@@ -1,6 +1,6 @@
 import { test, expect } from "../../base.js";
 import { login } from "../../helpers.js";
-import { MockServer } from "../../mockServer.js";
+import { MockServer, MockConstellation } from "../../mockServer.js";
 import { createPost } from "../../factories.js";
 
 const postUri = "at://did:plc:author1/app.bsky.feed.post/abc123";
@@ -611,7 +611,7 @@ test.describe("Post thread view", () => {
       await expect(hiddenSection).toBeVisible();
     });
 
-    test("should place blocked replies in the hidden section", async ({
+    test("should load blocked replies via constellation backlinks and place them in the hidden section", async ({
       page,
     }) => {
       const postWithReplies = createPost({
@@ -635,7 +635,6 @@ test.describe("Post thread view", () => {
         authorHandle: "blocked1.bsky.social",
         authorDisplayName: "Blocked User",
       });
-      blockedReply.isBlockedReply = true;
 
       const mockServer = new MockServer();
       mockServer.addPosts([postWithReplies, normalReply, blockedReply]);
@@ -649,14 +648,23 @@ test.describe("Post thread view", () => {
             post: normalReply,
             replies: [],
           },
-          {
-            $type: "app.bsky.feed.defs#threadViewPost",
-            post: blockedReply,
-            replies: [],
-          },
         ],
       });
       await mockServer.setup(page);
+      const mockConstellation = new MockConstellation();
+      mockConstellation.setBacklinks(postUri, [
+        {
+          did: "did:plc:replier1",
+          collection: "app.bsky.feed.post",
+          rkey: "reply1",
+        },
+        {
+          did: "did:plc:blocked1",
+          collection: "app.bsky.feed.post",
+          rkey: "blockedreply",
+        },
+      ]);
+      await mockConstellation.setup(page);
 
       await login(page);
       await page.goto("/profile/author1.bsky.social/post/abc123");
@@ -664,13 +672,87 @@ test.describe("Post thread view", () => {
       const view = page.locator("#post-detail-view");
       await expect(view).toContainText("Normal reply", { timeout: 10000 });
 
-      // Blocked reply should not be in the main reply chains
       const replyChains = view.locator(".post-thread-reply-chains");
       await expect(replyChains).not.toContainText("Reply from blocked user");
 
-      // Hidden section should be present
       const hiddenSection = view.locator("hidden-replies-section");
       await expect(hiddenSection).toBeVisible();
+    });
+
+    test("should reveal loaded blocked replies when clicking 'Show more replies'", async ({
+      page,
+    }) => {
+      const postWithReplies = createPost({
+        uri: postUri,
+        text: "Post with blocked reply",
+        authorHandle: "author1.bsky.social",
+        authorDisplayName: "Author One",
+        replyCount: 2,
+      });
+
+      const normalReply = createPost({
+        uri: "at://did:plc:replier1/app.bsky.feed.post/reply1",
+        text: "Normal reply",
+        authorHandle: "replier1.bsky.social",
+        authorDisplayName: "Replier One",
+      });
+
+      const blockedReply = createPost({
+        uri: "at://did:plc:blocked1/app.bsky.feed.post/blockedreply",
+        text: "Reply from blocked user",
+        authorHandle: "blocked1.bsky.social",
+        authorDisplayName: "Blocked User",
+      });
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([postWithReplies, normalReply, blockedReply]);
+      mockServer.setPostThread(postUri, {
+        $type: "app.bsky.feed.defs#threadViewPost",
+        post: postWithReplies,
+        parent: null,
+        replies: [
+          {
+            $type: "app.bsky.feed.defs#threadViewPost",
+            post: normalReply,
+            replies: [],
+          },
+        ],
+      });
+      await mockServer.setup(page);
+      const mockConstellation = new MockConstellation();
+      mockConstellation.setBacklinks(postUri, [
+        {
+          did: "did:plc:replier1",
+          collection: "app.bsky.feed.post",
+          rkey: "reply1",
+        },
+        {
+          did: "did:plc:blocked1",
+          collection: "app.bsky.feed.post",
+          rkey: "blockedreply",
+        },
+      ]);
+      await mockConstellation.setup(page);
+
+      await login(page);
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+
+      const view = page.locator("#post-detail-view");
+      const hiddenSection = view.locator("hidden-replies-section");
+      await expect(hiddenSection.locator(".hidden-replies-button")).toBeVisible(
+        { timeout: 10000 },
+      );
+
+      await expect(hiddenSection.locator(".toggle-content")).not.toBeVisible();
+
+      await hiddenSection.locator(".hidden-replies-button").click();
+
+      await expect(hiddenSection.locator(".toggle-content")).toBeVisible();
+      await expect(hiddenSection).toContainText("Reply from blocked user");
+
+      await expect(
+        hiddenSection.locator(".hidden-replies-button"),
+      ).not.toBeVisible();
     });
 
     test("should reveal hidden replies when clicking 'Show more replies'", async ({
