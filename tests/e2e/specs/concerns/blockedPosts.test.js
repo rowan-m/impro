@@ -4,6 +4,21 @@ import { MockServer, MockConstellation } from "../../mockServer.js";
 import { createPost } from "../../factories.js";
 
 const postUri = "at://did:plc:author1/app.bsky.feed.post/abc123";
+const AUTHOR_A = {
+  did: "did:plc:authorA",
+  handle: "authorA.bsky.social",
+  name: "Author A",
+};
+const AUTHOR_B = {
+  did: "did:plc:authorB",
+  handle: "authorB.bsky.social",
+  name: "Author B",
+};
+const AUTHOR_C = {
+  did: "did:plc:authorC",
+  handle: "authorC.bsky.social",
+  name: "Author C",
+};
 
 test.describe("Blocked posts in post thread", () => {
   test.describe("Blocked parents", () => {
@@ -491,6 +506,281 @@ test.describe("Blocked posts in post thread", () => {
         await expect(
           view.locator(".missing-post-indicator"),
         ).not.toBeAttached();
+      });
+    });
+  });
+
+  test.describe("Blocked parent chain via constellation", () => {
+    test("should resolve blocked parents from two authors blocking each other", async ({
+      page,
+    }) => {
+      const NUM_POSTS = 20;
+      const posts = [];
+      for (let i = 0; i < NUM_POSTS; i++) {
+        const author = i % 2 === 0 ? AUTHOR_A : AUTHOR_B;
+        const uri = `at://${author.did}/app.bsky.feed.post/post${i}`;
+        const isFirst = i === 0;
+        posts.push(
+          createPost({
+            uri,
+            text: `Post ${i} by ${author.name}`,
+            authorHandle: author.handle,
+            authorDisplayName: author.name,
+            ...(isFirst
+              ? {}
+              : {
+                  reply: {
+                    parent: {
+                      uri: posts[i - 1].uri,
+                      cid: posts[i - 1].cid,
+                    },
+                    root: {
+                      uri: posts[0].uri,
+                      cid: posts[0].cid,
+                    },
+                  },
+                }),
+          }),
+        );
+      }
+
+      const mainPost = posts[NUM_POSTS - 1];
+      const mainPostUri = mainPost.uri;
+      const rootUri = posts[0].uri;
+      const immediateParent = posts[NUM_POSTS - 2];
+      const blockedGrandparent = posts[NUM_POSTS - 3];
+
+      const mockServer = new MockServer();
+      mockServer.addPosts(posts);
+
+      mockServer.setPostThread(mainPostUri, {
+        $type: "app.bsky.feed.defs#threadViewPost",
+        post: mainPost,
+        parent: {
+          $type: "app.bsky.feed.defs#threadViewPost",
+          post: immediateParent,
+          parent: {
+            $type: "app.bsky.feed.defs#blockedPost",
+            uri: blockedGrandparent.uri,
+            blocked: true,
+            author: {
+              did: blockedGrandparent.uri.split("/")[2],
+              viewer: { blocking: true },
+            },
+          },
+          replies: [],
+        },
+        replies: [],
+      });
+      await mockServer.setup(page);
+
+      const mockConstellation = new MockConstellation();
+      const threadBacklinks = posts.slice(1).map((post) => {
+        const [, , did, , rkey] = post.uri.split("/");
+        return { did, collection: "app.bsky.feed.post", rkey };
+      });
+      mockConstellation.setBacklinks(rootUri, threadBacklinks);
+      await mockConstellation.setup(page);
+
+      await login(page);
+      await page.goto(`/profile/${AUTHOR_B.handle}/post/post${NUM_POSTS - 1}`);
+
+      const view = page.locator("#post-detail-view");
+      await expect(view.locator('[data-testid="large-post"]')).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(view).toContainText("Post 1 by Author B", {
+        timeout: 10000,
+      });
+      await expect(view).toContainText(`Post ${NUM_POSTS - 3} by Author B`);
+    });
+
+    test("should handle a third blocked author interspersed in the parent chain", async ({
+      page,
+    }) => {
+      const NUM_POSTS = 20;
+      const posts = [];
+      for (let i = 0; i < NUM_POSTS; i++) {
+        let author;
+        if (i === 10) {
+          author = AUTHOR_C;
+        } else {
+          author = i % 2 === 0 ? AUTHOR_A : AUTHOR_B;
+        }
+        const uri = `at://${author.did}/app.bsky.feed.post/post${i}`;
+        const isFirst = i === 0;
+        posts.push(
+          createPost({
+            uri,
+            text: `Post ${i} by ${author.name}`,
+            authorHandle: author.handle,
+            authorDisplayName: author.name,
+            ...(isFirst
+              ? {}
+              : {
+                  reply: {
+                    parent: {
+                      uri: posts[i - 1].uri,
+                      cid: posts[i - 1].cid,
+                    },
+                    root: {
+                      uri: posts[0].uri,
+                      cid: posts[0].cid,
+                    },
+                  },
+                }),
+          }),
+        );
+      }
+
+      const mainPost = posts[NUM_POSTS - 1];
+      const mainPostUri = mainPost.uri;
+      const rootUri = posts[0].uri;
+      const immediateParent = posts[NUM_POSTS - 2];
+      const blockedGrandparent = posts[NUM_POSTS - 3];
+
+      const mockServer = new MockServer();
+      mockServer.addPosts(posts);
+
+      mockServer.setPostThread(mainPostUri, {
+        $type: "app.bsky.feed.defs#threadViewPost",
+        post: mainPost,
+        parent: {
+          $type: "app.bsky.feed.defs#threadViewPost",
+          post: immediateParent,
+          parent: {
+            $type: "app.bsky.feed.defs#blockedPost",
+            uri: blockedGrandparent.uri,
+            blocked: true,
+            author: {
+              did: blockedGrandparent.uri.split("/")[2],
+              viewer: { blocking: true },
+            },
+          },
+          replies: [],
+        },
+        replies: [],
+      });
+      await mockServer.setup(page);
+
+      const mockConstellation = new MockConstellation();
+      const threadBacklinks = posts.slice(1).map((post) => {
+        const [, , did, , rkey] = post.uri.split("/");
+        return { did, collection: "app.bsky.feed.post", rkey };
+      });
+      mockConstellation.setBacklinks(rootUri, threadBacklinks);
+      await mockConstellation.setup(page);
+
+      await login(page);
+      await page.goto(`/profile/${AUTHOR_B.handle}/post/post${NUM_POSTS - 1}`);
+
+      const view = page.locator("#post-detail-view");
+      await expect(view.locator('[data-testid="large-post"]')).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(view).toContainText("Post 10 by Author C", {
+        timeout: 10000,
+      });
+    });
+
+    test("should handle a non-blocked third author interspersed in the parent chain", async ({
+      page,
+    }) => {
+      const NUM_POSTS = 20;
+      const posts = [];
+      for (let i = 0; i < NUM_POSTS; i++) {
+        let author;
+        if (i === 10) {
+          author = AUTHOR_C;
+        } else {
+          author = i % 2 === 0 ? AUTHOR_A : AUTHOR_B;
+        }
+        const uri = `at://${author.did}/app.bsky.feed.post/post${i}`;
+        const isFirst = i === 0;
+        posts.push(
+          createPost({
+            uri,
+            text: `Post ${i} by ${author.name}`,
+            authorHandle: author.handle,
+            authorDisplayName: author.name,
+            ...(isFirst
+              ? {}
+              : {
+                  reply: {
+                    parent: {
+                      uri: posts[i - 1].uri,
+                      cid: posts[i - 1].cid,
+                    },
+                    root: {
+                      uri: posts[0].uri,
+                      cid: posts[0].cid,
+                    },
+                  },
+                }),
+          }),
+        );
+      }
+
+      const mainPost = posts[NUM_POSTS - 1];
+      const mainPostUri = mainPost.uri;
+      const rootUri = posts[0].uri;
+
+      function buildParentChain(index) {
+        if (index < 0) return null;
+        const post = posts[index];
+        const isC = index === 10;
+        if (isC) {
+          return {
+            $type: "app.bsky.feed.defs#threadViewPost",
+            post,
+            parent: buildParentChain(index - 1),
+            replies: [],
+          };
+        }
+        return {
+          $type: "app.bsky.feed.defs#blockedPost",
+          uri: post.uri,
+          blocked: true,
+          author: {
+            did: post.uri.split("/")[2],
+            viewer: { blocking: true },
+          },
+        };
+      }
+
+      const mockServer = new MockServer();
+      mockServer.addPosts(posts);
+
+      mockServer.setPostThread(mainPostUri, {
+        $type: "app.bsky.feed.defs#threadViewPost",
+        post: mainPost,
+        parent: {
+          $type: "app.bsky.feed.defs#threadViewPost",
+          post: posts[NUM_POSTS - 2],
+          parent: buildParentChain(NUM_POSTS - 3),
+          replies: [],
+        },
+        replies: [],
+      });
+      await mockServer.setup(page);
+
+      const mockConstellation = new MockConstellation();
+      const threadBacklinks = posts.slice(1).map((post) => {
+        const [, , did, , rkey] = post.uri.split("/");
+        return { did, collection: "app.bsky.feed.post", rkey };
+      });
+      mockConstellation.setBacklinks(rootUri, threadBacklinks);
+      await mockConstellation.setup(page);
+
+      await login(page);
+      await page.goto(`/profile/${AUTHOR_B.handle}/post/post${NUM_POSTS - 1}`);
+
+      const view = page.locator("#post-detail-view");
+      await expect(view.locator('[data-testid="large-post"]')).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(view).toContainText("Post 10 by Author C", {
+        timeout: 10000,
       });
     });
   });
