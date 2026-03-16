@@ -4964,6 +4964,8 @@ context-menu-item:last-child {
   color: var(--off-white);
   font-size: 14px;
   padding: 1em;
+  max-height: 20vh;
+  overflow-y: auto;
 }
 
 img[data-lightbox] {
