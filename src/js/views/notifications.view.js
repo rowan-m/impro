@@ -504,6 +504,7 @@ class NotificationsView extends View {
                 title: "Notifications",
                 showLoadingSpinner: isLoading,
                 leftButton: "menu",
+                onClickMenuButton: handleMenuClick,
                 bottomItemTemplate: () =>
                   tabBarTemplate({
                     tabs: [
