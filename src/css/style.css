@@ -835,6 +835,8 @@ body.scroll-locked header {
 }
 
 .tab-bar .tab-bar-button.active .tab-bar-button-label {
+  display: inline-block;
+  min-width: 3em;
   border-bottom: 3px solid var(--tab-bar-button-active-color);
   padding-bottom: 11px;
 }
