@@ -805,6 +805,333 @@ test.describe("Profile view", () => {
     await expect(view.locator(".profile-description")).not.toBeVisible();
   });
 
+  test.describe("Post notification subscription", () => {
+    test("should show bell button on other user's profile", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await expect(
+        view.locator('[data-testid="post-notifications-button"]'),
+      ).toBeVisible({ timeout: 10000 });
+    });
+
+    test("should not show bell button on own profile", async ({ page }) => {
+      const currentUserProfile = {
+        ...userProfile,
+        followersCount: 10,
+        followsCount: 5,
+        postsCount: 20,
+      };
+
+      const mockServer = new MockServer();
+      mockServer.addProfile(currentUserProfile);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${userProfile.did}`);
+
+      const view = page.locator("#profile-view");
+      await expect(
+        view.locator('[data-testid="profile-name"]'),
+      ).toContainText("Test User", { timeout: 10000 });
+      await expect(
+        view.locator('[data-testid="post-notifications-button"]'),
+      ).not.toBeVisible();
+    });
+
+    test("should not show bell button on blocked-by profile", async ({
+      page,
+    }) => {
+      const blockedByUser = {
+        ...otherUser,
+        viewer: { ...otherUser.viewer, blockedBy: true },
+      };
+
+      const mockServer = new MockServer();
+      mockServer.addProfile(blockedByUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${blockedByUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await expect(
+        view.locator('[data-testid="blocked-by-badge"]'),
+      ).toBeVisible({ timeout: 10000 });
+      await expect(
+        view.locator('[data-testid="post-notifications-button"]'),
+      ).not.toBeVisible();
+    });
+
+    test("should show outline bell icon when not subscribed", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      const bellButton = view.locator(
+        '[data-testid="post-notifications-button"]',
+      );
+      await expect(bellButton).toBeVisible({ timeout: 10000 });
+      await expect(bellButton.locator(".notifications-icon:not(.filled)")).toBeVisible();
+    });
+
+    test("should show filled bell icon when subscribed", async ({ page }) => {
+      const subscribedUser = {
+        ...otherUser,
+        viewer: {
+          ...otherUser.viewer,
+          activitySubscription: { post: true, reply: false },
+        },
+      };
+
+      const mockServer = new MockServer();
+      mockServer.addProfile(subscribedUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${subscribedUser.did}`);
+
+      const view = page.locator("#profile-view");
+      const bellButton = view.locator(
+        '[data-testid="post-notifications-button"]',
+      );
+      await expect(bellButton).toBeVisible({ timeout: 10000 });
+      await expect(bellButton.locator(".notifications-icon.filled")).toBeVisible();
+    });
+
+    test("should open post notifications dialog when bell button is clicked", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      const dialog = page.locator(".post-notifications-dialog");
+      await expect(dialog).toBeVisible();
+      await expect(
+        page.locator(".post-notifications-dialog-title"),
+      ).toContainText("Keep me posted");
+      await expect(
+        page.locator(".post-notifications-dialog-subtitle"),
+      ).toContainText("Get notified of this account's activity");
+    });
+
+    test("should show Posts and Replies toggles in dialog", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      await expect(page.locator('[data-testid="toggle-posts"]')).toBeVisible();
+      await expect(
+        page.locator('[data-testid="toggle-replies"]'),
+      ).toBeVisible();
+    });
+
+    test("should have save button disabled when no changes are made", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      await expect(
+        page.locator('[data-testid="save-subscription-button"]'),
+      ).toBeDisabled();
+    });
+
+    test("should enable save button after toggling Posts on", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      await page
+        .locator('[data-testid="toggle-posts"] .toggle-switch-track')
+        .click();
+
+      await expect(
+        page.locator('[data-testid="save-subscription-button"]'),
+      ).toBeEnabled();
+    });
+
+    test("should auto-disable Replies when Posts is toggled off", async ({
+      page,
+    }) => {
+      const subscribedUser = {
+        ...otherUser,
+        viewer: {
+          ...otherUser.viewer,
+          activitySubscription: { post: true, reply: true },
+        },
+      };
+
+      const mockServer = new MockServer();
+      mockServer.addProfile(subscribedUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${subscribedUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      // Both toggles should be checked initially
+      const postsToggle = page.locator('[data-testid="toggle-posts"]');
+      const repliesToggle = page.locator('[data-testid="toggle-replies"]');
+      await expect(postsToggle).toHaveAttribute("checked", "");
+      await expect(repliesToggle).toHaveAttribute("checked", "");
+
+      // Turn off Posts
+      await postsToggle.locator(".toggle-switch-track").click();
+
+      // Both should now be unchecked
+      await expect(postsToggle).not.toHaveAttribute("checked", "");
+      await expect(repliesToggle).not.toHaveAttribute("checked", "");
+    });
+
+    test("should auto-enable Posts when Replies is toggled on", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      // Initially both are off
+      const postsToggle = page.locator('[data-testid="toggle-posts"]');
+      const repliesToggle = page.locator('[data-testid="toggle-replies"]');
+      await expect(postsToggle).not.toHaveAttribute("checked", "");
+      await expect(repliesToggle).not.toHaveAttribute("checked", "");
+
+      // Toggle Replies on — should auto-enable Posts
+      await repliesToggle.locator(".toggle-switch-track").click();
+
+      await expect(postsToggle).toHaveAttribute("checked", "");
+      await expect(repliesToggle).toHaveAttribute("checked", "");
+    });
+
+    test("should close dialog and update bell icon after saving subscription", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      // Toggle Posts on
+      await page
+        .locator('[data-testid="toggle-posts"] .toggle-switch-track')
+        .click();
+
+      // Save
+      await page.locator('[data-testid="save-subscription-button"]').click();
+
+      // Dialog should close
+      await expect(
+        page.locator(".post-notifications-dialog"),
+      ).not.toBeVisible();
+
+      // Bell icon should now be filled
+      const bellButton = view.locator(
+        '[data-testid="post-notifications-button"]',
+      );
+      await expect(bellButton.locator(".notifications-icon.filled")).toBeVisible();
+    });
+
+    test("should close dialog when close button is clicked", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await view
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+
+      await expect(
+        page.locator(".post-notifications-dialog"),
+      ).toBeVisible();
+
+      await page.locator(".post-notifications-dialog-close").click();
+
+      await expect(
+        page.locator(".post-notifications-dialog"),
+      ).not.toBeVisible();
+    });
+
+    test("should not show bell button when logged out", async ({ page }) => {
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+
+      await page.goto(`/profile/${otherUser.did}`);
+
+      const view = page.locator("#profile-view");
+      await expect(
+        view.locator('[data-testid="profile-name"]'),
+      ).toContainText("Other User", { timeout: 10000 });
+      await expect(
+        view.locator('[data-testid="post-notifications-button"]'),
+      ).not.toBeVisible();
+    });
+  });
+
   test.describe("Labeler profiles", () => {
     test("should show '+ Subscribe' button on a labeler profile", async ({
       page,

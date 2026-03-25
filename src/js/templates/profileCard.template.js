@@ -9,6 +9,7 @@ import { getDisplayName } from "/js/dataHelpers.js";
 import { showToast } from "/js/toasts.js";
 import { avatarTemplate } from "/js/templates/avatar.template.js";
 import { chatIconTemplate } from "/js/templates/icons/chatIcon.template.js";
+import { notificationsIconTemplate } from "/js/templates/icons/notificationsIcon.template.js";
 import { formatLargeNumber, classnames, noop, sortBy } from "/js/utils.js";
 import { showSignInModal } from "/js/modals.js";
 import { richTextTemplate } from "/js/templates/richText.template.js";
@@ -83,11 +84,13 @@ export function profileCardTemplate({
   showSubscribeButton = false,
   labelerInfo = null,
   isSubscribed = false,
+  activitySubscription = null,
   onClickChat = noop,
   onClickFollow = noop,
   onClickMute = noop,
   onClickBlock = noop,
   onClickSubscribe = noop,
+  onClickPostNotifications = noop,
   onClickReport = noop,
 }) {
   const isFollowing = profile.viewer?.following;
@@ -116,16 +119,28 @@ export function profileCardTemplate({
         })}
         ${!isCurrentUser && !isLabeler && isAuthenticated && !isBlockedBy
           ? html`<button
-              class="rounded-button chat-button"
-              data-testid="chat-button"
-              ?disabled=${!canChat}
-              title="Go to chat"
-              @click=${() => {
-                onClickChat(profile);
-              }}
-            >
-              ${chatIconTemplate()}
-            </button>`
+                class="rounded-button bell-button"
+                data-testid="post-notifications-button"
+                title="${activitySubscription?.post
+                  ? "Manage post notifications"
+                  : "Get notified of new posts"}"
+                @click=${() => {
+                  onClickPostNotifications(profile);
+                }}
+              >
+                ${notificationsIconTemplate({ filled: !!activitySubscription?.post })}
+              </button>
+              <button
+                class="rounded-button chat-button"
+                data-testid="chat-button"
+                ?disabled=${!canChat}
+                title="Go to chat"
+                @click=${() => {
+                  onClickChat(profile);
+                }}
+              >
+                ${chatIconTemplate()}
+              </button>`
           : null}
         ${(() => {
           if (isCurrentUser) {

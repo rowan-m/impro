@@ -215,6 +215,11 @@ class ProfileView extends View {
               showSubscribeButton: !isDefaultLabeler,
               labelerInfo,
               isSubscribed,
+              activitySubscription: profile.viewer?.activitySubscription ?? null,
+              onClickPostNotifications: (profile) =>
+                profileInteractionHandler.handlePostNotificationSubscription(
+                  profile,
+                ),
               onClickChat: async (profile) => {
                 if (!profileChatStatus || !profileChatStatus.canChat) {
                   // This should never happen

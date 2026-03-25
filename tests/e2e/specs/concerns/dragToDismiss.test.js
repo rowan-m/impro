@@ -1,7 +1,7 @@
 import { test, expect } from "../../base.js";
 import { login } from "../../helpers.js";
 import { MockServer } from "../../mockServer.js";
-import { createPost } from "../../factories.js";
+import { createPost, createProfile } from "../../factories.js";
 
 test.use({
   hasTouch: true,
@@ -150,6 +150,68 @@ test.describe("Drag-to-dismiss", () => {
         endY: 430,
       });
       await expect(contextMenu).toBeVisible();
+    });
+  });
+
+  test.describe("post notifications dialog", () => {
+    async function openPostNotificationsDialog(page) {
+      const otherUser = createProfile({
+        did: "did:plc:otheruser1",
+        handle: "otheruser.bsky.social",
+        displayName: "Other User",
+      });
+      const mockServer = new MockServer();
+      mockServer.addProfile(otherUser);
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto(`/profile/${otherUser.did}`);
+      await page
+        .locator('[data-testid="post-notifications-button"]')
+        .click({ timeout: 10000 });
+      const dialog = page.locator(
+        "post-notifications-dialog .post-notifications-dialog",
+      );
+      await expect(dialog).toBeVisible({ timeout: 5000 });
+      return dialog;
+    }
+
+    test("dragging past threshold dismisses it", async ({ page }) => {
+      await openPostNotificationsDialog(page);
+      await drag(page, {
+        eventSourceSelector:
+          "post-notifications-dialog .post-notifications-dialog",
+        startY: 600,
+        endY: 700,
+      });
+      await expect(
+        page.locator(
+          "post-notifications-dialog .post-notifications-dialog",
+        ),
+      ).not.toBeVisible({ timeout: 2000 });
+    });
+
+    test("dragging below threshold snaps back", async ({ page }) => {
+      const dialog = await openPostNotificationsDialog(page);
+      await drag(page, {
+        eventSourceSelector:
+          "post-notifications-dialog .post-notifications-dialog",
+        startY: 600,
+        endY: 630,
+      });
+      await expect(dialog).toBeVisible();
+    });
+
+    test("drag starting on a button does not dismiss", async ({ page }) => {
+      const dialog = await openPostNotificationsDialog(page);
+      await drag(page, {
+        eventSourceSelector:
+          "post-notifications-dialog .post-notifications-dialog",
+        startTouchTargetSelector:
+          "post-notifications-dialog .post-notifications-dialog-save",
+        startY: 600,
+        endY: 730,
+      });
+      await expect(dialog).toBeVisible();
     });
   });
 

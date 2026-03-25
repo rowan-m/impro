@@ -749,6 +749,23 @@ export class Api {
     return res.data;
   }
 
+  async putActivitySubscription(did, activitySubscription) {
+    const res = await this.request(
+      "app.bsky.notification.putActivitySubscription",
+      {
+        method: "POST",
+        body: {
+          subject: did,
+          activitySubscription,
+        },
+        headers: {
+          "atproto-proxy": this.bskyAppViewServiceDid,
+        },
+      },
+    );
+    return res.data;
+  }
+
   async muteActor(did) {
     const res = await this.request("app.bsky.graph.muteActor", {
       method: "POST",

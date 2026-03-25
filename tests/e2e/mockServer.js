@@ -521,6 +521,24 @@ export class MockServer {
       });
     });
 
+    await page.route(
+      "**/xrpc/app.bsky.notification.putActivitySubscription*",
+      (route) => {
+        const body = route.request().postDataJSON();
+        const subject = body?.subject;
+        const activitySubscription = body?.activitySubscription;
+        const profile = this.profiles.get(subject);
+        if (profile) {
+          profile.viewer = { ...profile.viewer, activitySubscription };
+        }
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ subject, activitySubscription }),
+        });
+      },
+    );
+
     await page.route("**/xrpc/app.bsky.feed.getActorLikes*", (route) => {
       const url = new URL(route.request().url());
       const actor = url.searchParams.get("actor");

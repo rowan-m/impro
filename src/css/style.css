@@ -346,6 +346,18 @@ main {
   }
 }
 
+.rounded-button.bell-button {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rounded-button.bell-button .notifications-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .rounded-button.chat-button {
   padding: 6px 10px;
   display: flex;
@@ -5899,6 +5911,205 @@ moderation-warning .toggle-content {
 
 .report-no-labelers {
   text-align: center;
+}
+
+/* Toggle Switch */
+
+toggle-switch {
+  display: inline-block;
+}
+
+.toggle-switch-track {
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background-color: light-dark(var(--light-gray), var(--dark-gray));
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-switch-track.checked {
+  background-color: var(--highlight-color);
+}
+
+.toggle-switch-track.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toggle-switch-knob {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--white);
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch-track.checked .toggle-switch-knob {
+  transform: translateX(18px);
+}
+
+/* Post Notifications Dialog */
+
+.post-notifications-dialog {
+  border: var(--hair) solid var(--post-border-color);
+  border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
+  background-color: light-dark(var(--white), var(--mid-gray));
+  color: var(--text-color);
+  max-width: 100%;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  height: auto;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4);
+  animation: slide-up 0.15s ease-out;
+  transform: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+@media (min-width: 600px) {
+  .post-notifications-dialog {
+    max-width: 400px;
+    width: 90%;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    height: auto;
+    max-height: 80vh;
+    border-radius: var(--dialog-border-radius);
+    box-shadow: none;
+    animation: none;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.post-notifications-dialog::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background-color: var(--light-gray);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+@media (min-width: 600px) {
+  .post-notifications-dialog::before {
+    display: none;
+  }
+}
+
+.post-notifications-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.post-notifications-dialog-content {
+  padding: 24px 20px;
+  padding-top: 28px;
+  position: relative;
+}
+
+@media (min-width: 600px) {
+  .post-notifications-dialog-content {
+    padding-top: 24px;
+  }
+}
+
+.post-notifications-dialog-close {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-color);
+  padding: 4px 8px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+@media (min-width: 600px) {
+  .post-notifications-dialog-close {
+    display: block;
+  }
+}
+
+.post-notifications-dialog-close:hover {
+  opacity: 1;
+}
+
+.post-notifications-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-notifications-dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.post-notifications-dialog-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.post-notifications-dialog-subtitle {
+  margin: 0;
+  color: light-dark(var(--gray), var(--gray));
+  font-size: 0.95rem;
+}
+
+.post-notifications-dialog-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.post-notifications-dialog-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.post-notifications-dialog-option-label {
+  font-size: 1rem;
+}
+
+.post-notifications-dialog-error {
+  color: var(--error-color);
+  font-size: 0.9rem;
+}
+
+.post-notifications-dialog-save {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.post-notifications-dialog-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 #notifications-view header {
