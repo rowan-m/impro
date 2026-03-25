@@ -1,4 +1,5 @@
 import { EventEmitter } from "/js/eventEmitter.js";
+import { getQuotedPost, embedViewRecordToPostView } from "/js/dataHelpers.js";
 
 // The store saves canonical data from the server. Patches are layered on top of this.
 export class DataStore extends EventEmitter {
@@ -107,6 +108,14 @@ export class DataStore extends EventEmitter {
   setPost(postURI, post) {
     this.posts.set(postURI, post);
     this.emit("setPost", post);
+    // Also store quoted post if it exists
+    const quotedPost = getQuotedPost(post);
+    if (
+      quotedPost?.$type === "app.bsky.embed.record#viewRecord" &&
+      !this.hasPost(quotedPost.uri)
+    ) {
+      this.setPost(quotedPost.uri, embedViewRecordToPostView(quotedPost));
+    }
   }
 
   clearPost(postURI) {
