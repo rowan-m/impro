@@ -526,6 +526,9 @@ function submitStepTemplate({
         ?disabled=${isSubmitting}
       >
         ${isSubmitting ? "Submitting..." : "Submit report"}
+        ${isSubmitting
+          ? html`<div class="loading-spinner"></div>`
+          : ""}
       </button>
       ${error ? html`<div class="report-error">${error}</div>` : null}
     </div>
@@ -632,7 +635,7 @@ class ReportDialog extends Component {
     render(
       html`
         <dialog
-          class="report-dialog"
+          class="bottom-sheet report-dialog"
           @click=${(e) => {
             if (e.target.tagName === "DIALOG") {
               this.close();

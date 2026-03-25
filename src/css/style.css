@@ -306,6 +306,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   padding: 8px 15px;
   border-radius: var(--pill-button-border-radius);
   border: none;
@@ -4070,6 +4071,66 @@ emoji-picker {
   }
 }
 
+.bottom-sheet {
+  border: var(--hair) solid var(--post-border-color);
+  border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
+  background-color: light-dark(var(--white), var(--mid-gray));
+  color: var(--text-color);
+  max-width: 100%;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  height: auto;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4);
+  animation: slide-up 0.15s ease-out;
+  transform: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+@media (min-width: 800px) {
+  .bottom-sheet {
+    width: 90%;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    height: auto;
+    max-height: 80vh;
+    border-radius: var(--dialog-border-radius);
+    box-shadow: none;
+    animation: none;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.bottom-sheet::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background-color: var(--light-gray);
+  border-radius: 2px;
+}
+
+@media (min-width: 800px) {
+  .bottom-sheet::before {
+    display: none;
+  }
+}
+
+.bottom-sheet::backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+  animation: fade-in 0.2s ease-out;
+}
+
 .post-composer-top-bar {
   display: flex;
   justify-content: space-between;
@@ -4406,23 +4467,8 @@ emoji-picker {
 }
 
 .context-menu {
-  position: fixed;
   z-index: var(--context-menu-z-index);
-  border: none;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: auto;
-  width: 100%;
-  max-width: 100%;
-  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4);
-  margin: 0;
-  color: var(--text-color);
   background-color: var(--background-color);
-  border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
-  overflow: hidden;
-  border: var(--hair) solid var(--post-border-color);
-  animation: slide-up 0.15s ease-out;
   padding-top: 16px;
   padding-left: 16px;
   padding-right: 16px;
@@ -4430,9 +4476,7 @@ emoji-picker {
   touch-action: pan-y;
 }
 
-/* Show backdrop for context menu on mobile */
 .context-menu::backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
   animation: fade-in 0.25s ease-out;
 }
 
@@ -4441,18 +4485,6 @@ emoji-picker {
     background-color: transparent;
     animation: none;
   }
-}
-
-.context-menu::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 4px;
-  background-color: var(--light-gray);
-  border-radius: 2px;
 }
 
 context-menu-item:last-child {
@@ -4513,16 +4545,14 @@ context-menu-item:last-child {
     top: auto;
     width: auto;
     max-width: none;
+    max-height: none;
+    transform: none;
     box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.05);
     background-color: var(--context-menu-background-color);
     border-radius: var(--context-menu-border-radius);
     animation: none;
     padding: 0;
     touch-action: auto;
-  }
-
-  .context-menu::before {
-    display: none;
   }
 
   .context-menu-item {
@@ -5563,65 +5593,14 @@ moderation-warning .toggle-content {
 }
 
 .report-dialog {
-  border: var(--hair) solid var(--post-border-color);
-  border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
-  background-color: light-dark(var(--white), var(--mid-gray));
-  color: var(--text-color);
-  max-width: 100%;
-  width: 100%;
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
   top: 16px;
-  height: auto;
   max-height: calc(100vh - 16px);
-  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4);
-  animation: slide-up 0.15s ease-out;
-  transform: none;
-  margin: 0;
-  overflow: hidden;
-  padding: 0;
 }
 
 @media (min-width: 800px) {
   .report-dialog {
     max-width: 480px;
-    width: 90%;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    height: auto;
-    max-height: 80vh;
-    border-radius: var(--dialog-border-radius);
-    box-shadow: none;
-    animation: none;
-    transform: translate(-50%, -50%);
   }
-}
-
-.report-dialog::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 4px;
-  background-color: var(--light-gray);
-  border-radius: 2px;
-}
-
-@media (min-width: 800px) {
-  .report-dialog::before {
-    display: none;
-  }
-}
-
-.report-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.6);
-  animation: fade-in 0.2s ease-out;
 }
 
 .report-dialog-content {
@@ -5956,65 +5935,14 @@ toggle-switch {
 
 /* Post Notifications Dialog */
 
-.post-notifications-dialog {
-  border: var(--hair) solid var(--post-border-color);
-  border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
-  background-color: light-dark(var(--white), var(--mid-gray));
-  color: var(--text-color);
-  max-width: 100%;
-  width: 100%;
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: auto;
-  height: auto;
-  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4);
-  animation: slide-up 0.15s ease-out;
-  transform: none;
-  margin: 0;
-  overflow: hidden;
-  padding: 0;
-}
-
-@media (min-width: 600px) {
-  .post-notifications-dialog {
-    max-width: 400px;
-    width: 90%;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    height: auto;
-    max-height: 80vh;
-    border-radius: var(--dialog-border-radius);
-    box-shadow: none;
-    animation: none;
-    transform: translate(-50%, -50%);
-  }
-}
-
 .post-notifications-dialog::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 4px;
-  background-color: var(--light-gray);
-  border-radius: 2px;
   z-index: 1;
 }
 
-@media (min-width: 600px) {
-  .post-notifications-dialog::before {
-    display: none;
+@media (min-width: 800px) {
+  .post-notifications-dialog {
+    max-width: 400px;
   }
-}
-
-.post-notifications-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .post-notifications-dialog-content {
@@ -6023,7 +5951,7 @@ toggle-switch {
   position: relative;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 800px) {
   .post-notifications-dialog-content {
     padding-top: 24px;
   }
@@ -6044,7 +5972,7 @@ toggle-switch {
   opacity: 0.6;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 800px) {
   .post-notifications-dialog-close {
     display: block;
   }

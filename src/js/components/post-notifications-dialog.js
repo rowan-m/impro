@@ -31,7 +31,7 @@ class PostNotificationsDialog extends Component {
     render(
       html`
         <dialog
-          class="post-notifications-dialog"
+          class="bottom-sheet post-notifications-dialog"
           @click=${(event) => {
             if (event.target.tagName === "DIALOG") {
               this.close();
@@ -106,6 +106,9 @@ class PostNotificationsDialog extends Component {
                 @click=${() => this._save()}
               >
                 ${this._isSaving ? "Saving..." : "Save changes"}
+                ${this._isSaving
+                  ? html`<div class="loading-spinner"></div>`
+                  : ""}
               </button>
             </div>
           </div>
