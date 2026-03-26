@@ -253,7 +253,7 @@ export function enableDragToDismiss(
     target.__dragToDismiss.cleanup();
   }
 
-  const DISMISS_THRESHOLD = 50;
+  const DISMISS_THRESHOLD = 75;
   const RESISTANCE_FACTOR = 0.6;
 
   const dragState = {
