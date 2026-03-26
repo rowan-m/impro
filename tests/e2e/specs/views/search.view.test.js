@@ -21,7 +21,7 @@ test.describe("Search view", () => {
     await expect(view.locator(".search-input")).toBeVisible({ timeout: 10000 });
     await expect(view.locator(".search-placeholder")).toBeVisible();
     await expect(view.locator(".search-placeholder-text")).toContainText(
-      "Start typing to search for users and posts.",
+      "Start typing to search for users, posts, and feeds.",
     );
   });
 
@@ -437,6 +437,72 @@ test.describe("Search view", () => {
       timeout: 10000,
     });
     await expect(view).toContainText("My Feed");
+  });
+
+  test("should display pin buttons on feed search results with correct pin state", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    const feed1 = createFeedGenerator({
+      uri: "at://did:plc:creator1/app.bsky.feed.generator/science",
+      displayName: "Science Feed",
+      creatorHandle: "creator1.bsky.social",
+    });
+    const feed2 = createFeedGenerator({
+      uri: "at://did:plc:creator2/app.bsky.feed.generator/tech",
+      displayName: "Tech Feed",
+      creatorHandle: "creator2.bsky.social",
+    });
+    mockServer.addSearchFeedGenerators([feed1, feed2]);
+    mockServer.setPinnedFeeds([feed1.uri]);
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/search?q=feed&tab=feeds");
+
+    const view = page.locator("#search-view");
+    await expect(view.locator(".feeds-list-item")).toHaveCount(2, {
+      timeout: 10000,
+    });
+
+    const firstItem = view.locator(".feeds-list-item").nth(0);
+    const secondItem = view.locator(".feeds-list-item").nth(1);
+
+    // First feed is pinned — should show "Unpin" with pinned class
+    await expect(firstItem.locator(".pin-feed-button.pinned")).toBeVisible();
+    await expect(firstItem.locator(".pin-feed-button")).toContainText("Unpin feed");
+
+    // Second feed is not pinned — should show "Pin feed" with primary class
+    await expect(
+      secondItem.locator(".pin-feed-button.rounded-button-primary"),
+    ).toBeVisible();
+    await expect(secondItem.locator(".pin-feed-button")).toContainText("Pin feed");
+  });
+
+  test("should not navigate to feed detail when clicking pin button", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    const feed = createFeedGenerator({
+      uri: "at://did:plc:creator1/app.bsky.feed.generator/science",
+      displayName: "Science Feed",
+      creatorHandle: "creator1.bsky.social",
+    });
+    mockServer.addSearchFeedGenerators([feed]);
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/search?q=science&tab=feeds");
+
+    const view = page.locator("#search-view");
+    await expect(view.locator(".feeds-list-item")).toHaveCount(1, {
+      timeout: 10000,
+    });
+
+    await view.locator(".pin-feed-button").click();
+
+    // Should stay on search page
+    await expect(page).toHaveURL(/\/search/);
   });
 
   test.describe("Logged-out behavior", () => {

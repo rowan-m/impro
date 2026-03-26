@@ -9,6 +9,8 @@ import { avatarTemplate } from "/js/templates/avatar.template.js";
 import { linkToProfile, linkToFeed } from "/js/navigation.js";
 import { smallPostTemplate } from "/js/templates/smallPost.template.js";
 import { PostInteractionHandler } from "/js/postInteractionHandler.js";
+import { FeedInteractionHandler } from "/js/feedInteractionHandler.js";
+import { pinIconTemplate } from "/js/templates/icons/pinIcon.template.js";
 import { tabBarTemplate } from "/js/templates/tabBar.template.js";
 
 class SearchView extends View {
@@ -80,6 +82,10 @@ class SearchView extends View {
         renderFunc: () => renderPage(),
       },
     );
+
+    const feedInteractionHandler = new FeedInteractionHandler(dataLayer, {
+      renderFunc: () => renderPage(),
+    });
 
     const handleSearchInput = debounce((value) => {
       state.searchQuery = value;
@@ -180,7 +186,7 @@ class SearchView extends View {
       </div>`;
     }
 
-    function feedSearchResultsTemplate({ status, feedSearchResults }) {
+    function feedSearchResultsTemplate({ status, feedSearchResults, preferences }) {
       if (!feedSearchResults && status.loading) {
         return html`<div class="search-status-message">Searching feeds…</div>`;
       }
@@ -198,8 +204,9 @@ class SearchView extends View {
           loading: status.loading,
         })}
       >
-        ${feedSearchResults.map(
-          (feedGenerator) => html`
+        ${feedSearchResults.map((feedGenerator) => {
+          const isPinned = preferences.isFeedPinned(feedGenerator.uri);
+          return html`
             <div
               class="feeds-list-item clickable"
               @click=${() => window.router.go(linkToFeed(feedGenerator))}
@@ -232,9 +239,27 @@ class SearchView extends View {
                     </div>`
                   : ""}
               </div>
+              <div class="feeds-list-item-actions">
+                <button
+                  class=${classnames("rounded-button pin-feed-button", {
+                    "rounded-button-primary": !isPinned,
+                    pinned: isPinned,
+                  })}
+                  @click=${(e) => {
+                    e.stopPropagation();
+                    feedInteractionHandler.handlePinFeed(
+                      feedGenerator.uri,
+                      !isPinned,
+                    );
+                  }}
+                >
+                  ${isPinned ? "" : pinIconTemplate({ filled: false })}
+                  ${isPinned ? "Unpin feed" : "Pin feed"}
+                </button>
+              </div>
             </div>
-          `,
-        )}
+          `;
+        })}
       </div>`;
     }
 
@@ -253,6 +278,7 @@ class SearchView extends View {
       const profileSearchResults =
         dataLayer.selectors.getProfileSearchResults();
       const feedSearchResults = dataLayer.selectors.getFeedSearchResults();
+      const preferences = dataLayer.selectors.getPreferences();
 
       render(
         html`<div id="search-view">
@@ -343,6 +369,7 @@ class SearchView extends View {
                               ${feedSearchResultsTemplate({
                                 status: feedStatus,
                                 feedSearchResults,
+                                preferences,
                               })}
                             </div>
                           </div>

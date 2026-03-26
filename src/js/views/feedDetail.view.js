@@ -8,6 +8,7 @@ import "/js/components/infinite-scroll-container.js";
 import { textHeaderTemplate } from "/js/templates/textHeader.template.js";
 import { pinIconTemplate } from "/js/templates/icons/pinIcon.template.js";
 import { PostInteractionHandler } from "/js/postInteractionHandler.js";
+import { FeedInteractionHandler } from "/js/feedInteractionHandler.js";
 import { FEED_PAGE_SIZE } from "/js/config.js";
 import { showToast } from "/js/toasts.js";
 import "/js/components/context-menu.js";
@@ -48,33 +49,9 @@ class FeedDetailView extends View {
       },
     );
 
-    async function handleClickPinFeed(doPin) {
-      if (doPin) {
-        try {
-          const promise = dataLayer.mutations.pinFeed(feedUri);
-          renderPage();
-          await promise;
-          renderPage();
-          showToast("Feed pinned");
-        } catch (error) {
-          console.error(error);
-          showToast("Failed to pin feed", { error: true });
-          renderPage();
-        }
-      } else {
-        try {
-          const promise = dataLayer.mutations.unpinFeed(feedUri);
-          renderPage();
-          await promise;
-          renderPage();
-          showToast("Feed unpinned");
-        } catch (error) {
-          console.error(error);
-          showToast("Failed to unpin feed", { error: true });
-          renderPage();
-        }
-      }
-    }
+    const feedInteractionHandler = new FeedInteractionHandler(dataLayer, {
+      renderFunc: () => renderPage(),
+    });
 
     async function renderPage() {
       const showLessInteractions =
@@ -92,8 +69,7 @@ class FeedDetailView extends View {
       const feedAuthor = feedGenerator?.creator;
       const feedAuthorHandle = feedAuthor?.handle;
       const preferences = dataLayer.selectors.getPreferences();
-      const pinnedFeeds = preferences.getPinnedFeeds();
-      const isPinned = pinnedFeeds.some((feed) => feed.value === feedUri);
+      const isPinned = preferences.isFeedPinned(feedUri);
       render(
         html`<div id="feed-detail-view">
           ${mainLayoutTemplate({
@@ -141,7 +117,7 @@ class FeedDetailView extends View {
                       class=${classnames("pin-feed-button", {
                         pinned: isPinned,
                       })}
-                      @click=${() => handleClickPinFeed(!isPinned)}
+                      @click=${() => feedInteractionHandler.handlePinFeed(feedUri, !isPinned)}
                     >
                       ${pinIconTemplate({ filled: isPinned })}
                     </button>`;

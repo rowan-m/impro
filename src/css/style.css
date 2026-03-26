@@ -3974,6 +3974,12 @@ emoji-picker {
   -webkit-box-orient: vertical;
 }
 
+.feeds-list-item-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
 .feed-menu-button {
   border: none;
   background: none;
@@ -3992,7 +3998,7 @@ emoji-picker {
   top: -2px;
 }
 
-.pin-feed-button {
+#feed-detail-view .pin-feed-button {
   width: 24px;
   height: 24px;
   border: none;
@@ -4002,8 +4008,13 @@ emoji-picker {
   font-size: 24px;
 }
 
-.pin-feed-button.pinned {
+#feed-detail-view .pin-feed-button.pinned {
   color: var(--highlight-color);
+}
+
+.feeds-list-item .pin-feed-button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .post-composer {
