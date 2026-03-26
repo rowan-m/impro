@@ -101,6 +101,19 @@ html {
   --icon-button-color: var(--text-color-muted);
   --tab-bar-button-active-color: var(--highlight-color);
 
+  /* avatar sizes */
+  --avatar-size-quoted-post: 16px;
+  --avatar-size-footer-nav: 24px;
+  --avatar-size-followed-by: 24px;
+  --avatar-size-reply-prompt: 28px;
+  --avatar-size-message: 32px;
+  --avatar-size-message-input: 36px;
+  --avatar-size-post: 40px;
+  --avatar-size-sidebar-compact: 48px;
+  --avatar-size-convo: 50px;
+  --avatar-size-sidebar: 52px;
+  --avatar-size-profile: 100px;
+
   /* border radius */
   --skeleton-border-radius: 4px;
   --tag-border-radius: 4px;
@@ -639,8 +652,8 @@ input[type="color"]::-moz-color-swatch {
 }
 
 .skeleton-avatar {
-  width: 40px;
-  height: 40px;
+  width: var(--avatar-size-post);
+  height: var(--avatar-size-post);
   border-radius: var(--avatar-border-radius);
   background-color: var(--skeleton-color);
 }
@@ -722,8 +735,8 @@ input[type="color"]::-moz-color-swatch {
 }
 
 .avatar-image {
-  width: 40px;
-  height: 40px;
+  width: var(--avatar-size-post);
+  height: var(--avatar-size-post);
   border-radius: var(--avatar-border-radius);
   flex-shrink: 0;
   background-color: var(--skeleton-color);
@@ -742,8 +755,8 @@ input[type="color"]::-moz-color-swatch {
 }
 
 .avatar-placeholder {
-  width: 32px;
-  height: 32px;
+  width: var(--avatar-size-post);
+  height: var(--avatar-size-post);
   border-radius: var(--avatar-border-radius);
   background-color: var(--generic-border-color);
 }
@@ -927,14 +940,10 @@ body.scroll-locked header {
     padding-bottom: 0 !important;
   }
 
-  .sidebar .sidebar-profile-avatar .avatar-image {
-    width: 48px;
-    height: 48px;
-  }
-
+  .sidebar .sidebar-profile-avatar .avatar-image,
   .sidebar .sidebar-profile-avatar .avatar-placeholder {
-    width: 48px;
-    height: 48px;
+    width: var(--avatar-size-sidebar-compact);
+    height: var(--avatar-size-sidebar-compact);
   }
 
   .sidebar-divider {
@@ -995,16 +1004,18 @@ body.scroll-locked header {
   }
 }
 
+.sidebar-profile-avatar .avatar-image,
+.sidebar-profile-avatar .avatar-placeholder {
+  width: var(--avatar-size-sidebar);
+  height: var(--avatar-size-sidebar);
+}
+
 .sidebar-profile-avatar .avatar-image {
-  width: 52px;
-  height: 52px;
   border-radius: var(--avatar-border-radius);
   border: var(--hair) solid var(--post-border-color);
 }
 
 .sidebar-profile-avatar .avatar-placeholder {
-  width: 52px;
-  height: 52px;
   border-radius: var(--avatar-border-radius);
   background-color: var(--skeleton-color);
   border: var(--hair) solid var(--post-border-color);
@@ -1303,13 +1314,13 @@ body.scroll-locked header {
 }
 
 .footer-nav-item .avatar-image {
-  width: 24px;
-  height: 24px;
+  width: var(--avatar-size-footer-nav);
+  height: var(--avatar-size-footer-nav);
 }
 
 .footer-nav-item .avatar-image-placeholder {
-  width: 24px;
-  height: 24px;
+  width: var(--avatar-size-footer-nav);
+  height: var(--avatar-size-footer-nav);
   border-radius: var(--avatar-border-radius);
   background-color: var(--skeleton-color);
   border: var(--hair) solid var(--post-border-color);
@@ -1717,8 +1728,8 @@ body.scroll-locked header {
 }
 
 .post-thread-reply-prompt .avatar .avatar-image {
-  width: 28px;
-  height: 28px;
+  width: var(--avatar-size-reply-prompt);
+  height: var(--avatar-size-reply-prompt);
 }
 
 .post-thread-reply-prompt-text {
@@ -2161,8 +2172,8 @@ like-button {
 }
 
 .quoted-post .avatar-image {
-  width: 16px;
-  height: 16px;
+  width: var(--avatar-size-quoted-post);
+  height: var(--avatar-size-quoted-post);
 }
 
 .quoted-post-header {
@@ -2884,8 +2895,8 @@ lightbox-image-group.post-images.num-images-4 .post-image {
 }
 
 .convo-avatar .avatar-image {
-  width: 50px;
-  height: 50px;
+  width: var(--avatar-size-convo);
+  height: var(--avatar-size-convo);
 }
 
 .convo-content {
@@ -2944,8 +2955,8 @@ lightbox-image-group.post-images.num-images-4 .post-image {
 }
 
 .convo-skeleton-avatar {
-  width: 48px;
-  height: 48px;
+  width: var(--avatar-size-convo);
+  height: var(--avatar-size-convo);
   border-radius: var(--avatar-border-radius);
 }
 
@@ -3143,18 +3154,18 @@ lightbox-image-group.post-images.num-images-4 .post-image {
 
 .message-avatar {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--avatar-size-message);
+  height: var(--avatar-size-message);
 }
 
 .message-avatar .avatar-image {
-  width: 32px;
-  height: 32px;
+  width: var(--avatar-size-message);
+  height: var(--avatar-size-message);
 }
 
 .message-avatar-spacer {
-  width: 32px;
-  height: 32px;
+  width: var(--avatar-size-message);
+  height: var(--avatar-size-message);
   flex-shrink: 0;
 }
 
@@ -3265,13 +3276,13 @@ chat-input {
 
 .message-input-avatar {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: var(--avatar-size-message-input);
+  height: var(--avatar-size-message-input);
 }
 
 .message-input-avatar .avatar-image {
-  width: 36px;
-  height: 36px;
+  width: var(--avatar-size-message-input);
+  height: var(--avatar-size-message-input);
 }
 
 .message-input-field {
@@ -3528,9 +3539,8 @@ emoji-picker {
 }
 
 .profile-header .avatar-image {
-  width: 100px;
-  height: 100px;
-
+  width: var(--avatar-size-profile);
+  height: var(--avatar-size-profile);
   border-color: var(--background-color);
   border-width: 2px;
 }
@@ -3654,8 +3664,8 @@ emoji-picker {
 }
 
 .profile-followed-by-avatar {
-  width: 24px;
-  height: 24px;
+  width: var(--avatar-size-followed-by);
+  height: var(--avatar-size-followed-by);
   border-radius: var(--avatar-border-radius);
   border: 2px solid var(--background-color);
   margin-left: -4px;
@@ -5754,8 +5764,9 @@ moderation-warning .toggle-content {
   flex-shrink: 0;
 }
 
-.report-labeler-avatar avatar-element {
-  --avatar-size: 40px;
+.report-labeler-avatar avatar-element .avatar-image {
+  width: var(--avatar-size-post);
+  height: var(--avatar-size-post);
 }
 
 .report-labeler-info {
