@@ -220,6 +220,17 @@ export function profileCardTemplate({
               Copy link to profile
             </context-menu-item>
           </context-menu-item-group>
+          ${isAuthenticated
+            ? html`
+                <context-menu-item
+                  @click=${() => {
+                    router.go(linkToSearchPostsByProfile(profile));
+                  }}
+                >
+                  Search posts
+                </context-menu-item>
+              `
+            : null}
           ${isAuthenticated && !isCurrentUser
             ? html`
                 ${isLabeler
@@ -234,13 +245,6 @@ export function profileCardTemplate({
                       </context-menu-item>
                     `
                   : null}
-                <context-menu-item
-                  @click=${() => {
-                    router.go(linkToSearchPostsByProfile(profile));
-                  }}
-                >
-                  Search posts
-                </context-menu-item>
                 <context-menu-item-group>
                   <context-menu-item
                     @click=${() => {

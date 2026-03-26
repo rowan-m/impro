@@ -690,9 +690,12 @@ test.describe("Profile view", () => {
     await view.locator(".ellipsis-button").click();
 
     const menu = view.locator("context-menu");
-    await expect(menu.locator("context-menu-item")).toHaveCount(2, {
+    await expect(menu.locator("context-menu-item")).toHaveCount(3, {
       timeout: 5000,
     });
+    await expect(
+      menu.locator("context-menu-item", { hasText: "Search posts" }),
+    ).toBeVisible();
     await expect(
       menu.locator("context-menu-item", { hasText: "Mute Account" }),
     ).not.toBeVisible();
@@ -702,6 +705,69 @@ test.describe("Profile view", () => {
     await expect(
       menu.locator("context-menu-item", { hasText: "Report account" }),
     ).not.toBeVisible();
+  });
+
+  test("should navigate to search page when clicking 'Search posts' on another user's profile", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    mockServer.addProfile(otherUser);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${otherUser.did}`);
+
+    const view = page.locator("#profile-view");
+    await expect(view.locator('[data-testid="profile-name"]')).toContainText(
+      "Other User",
+      { timeout: 10000 },
+    );
+
+    await view.locator(".ellipsis-button").click();
+
+    const menu = view.locator("context-menu");
+    await menu
+      .locator("context-menu-item", { hasText: "Search posts" })
+      .click();
+
+    await expect(page).toHaveURL(
+      /\/search\?q=from%3A%40otheruser\.bsky\.social&tab=posts/,
+      { timeout: 10000 },
+    );
+  });
+
+  test("should navigate to search page when clicking 'Search posts' on own profile", async ({
+    page,
+  }) => {
+    const currentUserProfile = {
+      ...userProfile,
+      followersCount: 10,
+      followsCount: 5,
+      postsCount: 20,
+    };
+
+    const mockServer = new MockServer();
+    mockServer.addProfile(currentUserProfile);
+    await mockServer.setup(page);
+    await login(page);
+    await page.goto(`/profile/${userProfile.did}`);
+
+    const view = page.locator("#profile-view");
+    await expect(view.locator('[data-testid="profile-name"]')).toContainText(
+      "Test User",
+      { timeout: 10000 },
+    );
+
+    await view.locator(".ellipsis-button").click();
+
+    const menu = view.locator("context-menu");
+    await menu
+      .locator("context-menu-item", { hasText: "Search posts" })
+      .click();
+
+    await expect(page).toHaveURL(
+      /\/search\?q=from%3A%40testuser\.bsky\.social&tab=posts/,
+      { timeout: 10000 },
+    );
   });
 
   test("should display generic error when profile fails to load", async ({
