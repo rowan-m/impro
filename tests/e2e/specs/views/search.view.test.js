@@ -1,7 +1,11 @@
 import { test, expect } from "../../base.js";
 import { login } from "../../helpers.js";
 import { MockServer } from "../../mockServer.js";
-import { createPost, createProfile } from "../../factories.js";
+import {
+  createPost,
+  createProfile,
+  createFeedGenerator,
+} from "../../factories.js";
 
 test.describe("Search view", () => {
   test("should display search placeholder when no query is entered", async ({
@@ -132,7 +136,9 @@ test.describe("Search view", () => {
     ).toContainText("No posts found.", { timeout: 10000 });
   });
 
-  test("should switch between Profiles and Posts tabs", async ({ page }) => {
+  test("should switch between Profiles, Posts, and Feeds tabs", async ({
+    page,
+  }) => {
     const mockServer = new MockServer();
     mockServer.addSearchProfiles([
       createProfile({
@@ -147,6 +153,13 @@ test.describe("Search view", () => {
         text: "A matching post",
         authorHandle: "author1.bsky.social",
         authorDisplayName: "Author One",
+      }),
+    ]);
+    mockServer.addSearchFeedGenerators([
+      createFeedGenerator({
+        uri: "at://did:plc:feedcreator1/app.bsky.feed.generator/myfeed",
+        displayName: "My Custom Feed",
+        creatorHandle: "feedcreator1.bsky.social",
       }),
     ]);
     await mockServer.setup(page);
@@ -170,6 +183,16 @@ test.describe("Search view", () => {
       timeout: 10000,
     });
     await expect(view).toContainText("A matching post");
+
+    // Switch to Feeds tab
+    await view.locator(".tab-bar-button", { hasText: "Feeds" }).click();
+    await expect(
+      view.locator(".tab-bar-button.active", { hasText: "Feeds" }),
+    ).toBeVisible();
+    await expect(view.locator(".feeds-list-item")).toHaveCount(1, {
+      timeout: 10000,
+    });
+    await expect(view).toContainText("My Custom Feed");
 
     // Switch back to Profiles tab
     await view.locator(".tab-bar-button", { hasText: "Profiles" }).click();
@@ -311,6 +334,111 @@ test.describe("Search view", () => {
     );
   });
 
+  test("should display feed search results when switching to Feeds tab", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    const feed1 = createFeedGenerator({
+      uri: "at://did:plc:creator1/app.bsky.feed.generator/science",
+      displayName: "Science Feed",
+      creatorHandle: "creator1.bsky.social",
+      description: "The latest science news and discoveries",
+    });
+    const feed2 = createFeedGenerator({
+      uri: "at://did:plc:creator2/app.bsky.feed.generator/tech",
+      displayName: "Tech Feed",
+      creatorHandle: "creator2.bsky.social",
+      description: "All things technology",
+    });
+    mockServer.addSearchFeedGenerators([feed1, feed2]);
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/search?q=feed");
+
+    const view = page.locator("#search-view");
+    await view.locator(".tab-bar-button", { hasText: "Feeds" }).click();
+
+    await expect(view.locator(".feeds-list-item")).toHaveCount(2, {
+      timeout: 10000,
+    });
+    await expect(view).toContainText("Science Feed");
+    await expect(view).toContainText("by @creator1.bsky.social");
+    await expect(view).toContainText("Tech Feed");
+    await expect(view).toContainText("by @creator2.bsky.social");
+    await expect(view).toContainText("The latest science news and discoveries");
+    await expect(view).toContainText("All things technology");
+  });
+
+  test("should show empty state when no feeds match", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/search?q=nonexistentfeed&tab=feeds");
+
+    const view = page.locator("#search-view");
+    const feedsPanel = view.locator(
+      ".search-tab-panel:not([hidden]) .search-results-panel",
+    );
+    await expect(feedsPanel.locator(".search-status-message")).toContainText(
+      "No feeds found.",
+      { timeout: 10000 },
+    );
+  });
+
+  test("should navigate to feed detail when clicking a feed result", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    const feed = createFeedGenerator({
+      uri: "at://did:plc:feedauthor1/app.bsky.feed.generator/coolstuff",
+      displayName: "Cool Stuff",
+      creatorHandle: "feedauthor1.bsky.social",
+    });
+    mockServer.addSearchFeedGenerators([feed]);
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/search?q=cool&tab=feeds");
+
+    const view = page.locator("#search-view");
+    await expect(view.locator(".feeds-list-item")).toHaveCount(1, {
+      timeout: 10000,
+    });
+
+    await view.locator(".feeds-list-item").click();
+
+    await expect(page).toHaveURL(
+      /\/profile\/feedauthor1\.bsky\.social\/feed\/coolstuff/,
+      { timeout: 10000 },
+    );
+  });
+
+  test("should load Feeds tab from query parameter", async ({ page }) => {
+    const mockServer = new MockServer();
+    mockServer.addSearchFeedGenerators([
+      createFeedGenerator({
+        uri: "at://did:plc:creator1/app.bsky.feed.generator/myfeed",
+        displayName: "My Feed",
+        creatorHandle: "creator1.bsky.social",
+      }),
+    ]);
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/search?q=test&tab=feeds");
+
+    const view = page.locator("#search-view");
+    await expect(
+      view.locator(".tab-bar-button.active", { hasText: "Feeds" }),
+    ).toBeVisible({ timeout: 10000 });
+    await expect(view.locator(".feeds-list-item")).toHaveCount(1, {
+      timeout: 10000,
+    });
+    await expect(view).toContainText("My Feed");
+  });
+
   test.describe("Logged-out behavior", () => {
     test("should allow searching profiles and posts without authentication", async ({
       page,
@@ -338,9 +466,12 @@ test.describe("Search view", () => {
       await expect(view).toContainText("Alice");
       await expect(view).toContainText("Alicia");
 
-      // Posts tab should be hidden for logged-out users
+      // Posts and Feeds tabs should be hidden for logged-out users
       await expect(
         view.locator(".tab-bar-button", { hasText: "Posts" }),
+      ).not.toBeVisible();
+      await expect(
+        view.locator(".tab-bar-button", { hasText: "Feeds" }),
       ).not.toBeVisible();
     });
   });

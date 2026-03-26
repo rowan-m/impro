@@ -182,6 +182,10 @@ export class Selectors {
     return this.dataStore.getProfileSearchResults();
   }
 
+  getFeedSearchResults() {
+    return this.dataStore.getFeedSearchResults();
+  }
+
   getPostSearchResults() {
     const searchResults = this.dataStore.getPostSearchResults();
     if (!searchResults) {

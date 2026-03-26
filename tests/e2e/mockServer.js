@@ -32,6 +32,7 @@ export class MockServer {
     this.profileFollows = new Map();
     this.profiles = new Map();
     this.savedFeedUris = [];
+    this.searchFeedGenerators = [];
     this.searchPosts = [];
     this.searchProfiles = [];
     this.timelinePosts = [];
@@ -82,6 +83,10 @@ export class MockServer {
 
   addSearchProfiles(profiles) {
     this.searchProfiles.push(...profiles);
+  }
+
+  addSearchFeedGenerators(feedGenerators) {
+    this.searchFeedGenerators.push(...feedGenerators);
   }
 
   addTypeaheadProfiles(profiles) {
@@ -664,6 +669,18 @@ export class MockServer {
           cursor: "",
         }),
       }),
+    );
+
+    await page.route(
+      "**/xrpc/app.bsky.unspecced.getPopularFeedGenerators*",
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            feeds: this.searchFeedGenerators,
+          }),
+        }),
     );
 
     await page.route("**/xrpc/app.bsky.feed.searchPosts*", (route) => {

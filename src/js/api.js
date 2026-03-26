@@ -279,6 +279,19 @@ export class Api {
     return res.data.feeds;
   }
 
+  async searchFeedGenerators(query, { limit = 15 } = {}) {
+    const res = await this.request(
+      `app.bsky.unspecced.getPopularFeedGenerators`,
+      {
+        query: { limit, query },
+        headers: {
+          "atproto-proxy": this.bskyAppViewServiceDid,
+        },
+      },
+    );
+    return res.data.feeds;
+  }
+
   async getFollowingFeed({ limit = 31, cursor = "", labelers = [] } = {}) {
     const res = await this.request(`app.bsky.feed.getTimeline`, {
       query: { limit, cursor },

@@ -92,6 +92,7 @@ export class Requests {
     this.enableStatus(this.loadNextAuthorFeedPage, "loadNextAuthorFeedPage");
     this.enableStatus(this.loadProfileSearch, "loadProfileSearch");
     this.enableStatus(this.loadPostSearch, "loadPostSearch");
+    this.enableStatus(this.loadFeedSearch, "loadFeedSearch");
     this.enableStatus(this.loadNotifications, "loadNotifications");
     this.enableStatus(
       this.loadMentionNotifications,
@@ -431,6 +432,22 @@ export class Requests {
       }
     }
     this.dataStore.setPostSearchResults(searchResults);
+  }
+
+  async loadFeedSearch(query, { limit = 15 } = {}) {
+    if (!query) {
+      this.dataStore.clearFeedSearchResults();
+      return;
+    }
+    const requestTime = Date.now();
+    this.dataStore.setLatestFeedSearchRequestTime(requestTime);
+    const searchResults = await this.api.searchFeedGenerators(query, {
+      limit,
+    });
+    if (requestTime !== this.dataStore.getLatestFeedSearchRequestTime()) {
+      return;
+    }
+    this.dataStore.setFeedSearchResults(searchResults);
   }
 
   async loadNextAuthorFeedPage(

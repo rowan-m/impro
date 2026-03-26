@@ -6,7 +6,7 @@ import { textHeaderTemplate } from "/js/templates/textHeader.template.js";
 import { getDisplayName } from "/js/dataHelpers.js";
 import { classnames, debounce } from "/js/utils.js";
 import { avatarTemplate } from "/js/templates/avatar.template.js";
-import { linkToProfile } from "/js/navigation.js";
+import { linkToProfile, linkToFeed } from "/js/navigation.js";
 import { smallPostTemplate } from "/js/templates/smallPost.template.js";
 import { PostInteractionHandler } from "/js/postInteractionHandler.js";
 import { tabBarTemplate } from "/js/templates/tabBar.template.js";
@@ -52,6 +52,11 @@ class SearchView extends View {
         requests.push(
           dataLayer.requests.loadPostSearch(normalizedQuery, {
             limit: 25,
+          }),
+        );
+        requests.push(
+          dataLayer.requests.loadFeedSearch(normalizedQuery, {
+            limit: 15,
           }),
         );
       }
@@ -175,6 +180,64 @@ class SearchView extends View {
       </div>`;
     }
 
+    function feedSearchResultsTemplate({ status, feedSearchResults }) {
+      if (!feedSearchResults && status.loading) {
+        return html`<div class="search-status-message">Searching feeds…</div>`;
+      }
+      if (status.error) {
+        return html`<div class="search-status-message error">
+          Failed to search feeds
+          ${status.error.message ? html`(${status.error.message})` : ""}.
+        </div>`;
+      }
+      if (!feedSearchResults || feedSearchResults.length === 0) {
+        return html`<div class="search-status-message">No feeds found.</div>`;
+      }
+      return html`<div
+        class=${classnames("feeds-list loading-area", {
+          loading: status.loading,
+        })}
+      >
+        ${feedSearchResults.map(
+          (feedGenerator) => html`
+            <div
+              class="feeds-list-item clickable"
+              @click=${() => window.router.go(linkToFeed(feedGenerator))}
+            >
+              <div class="feeds-list-item-avatar">
+                ${feedGenerator.avatar
+                  ? html`<img
+                      src=${feedGenerator.avatar}
+                      alt=${feedGenerator.displayName}
+                      class="feed-avatar"
+                    />`
+                  : html`<img
+                      src="/img/list-avatar-fallback.svg"
+                      alt=${feedGenerator.displayName}
+                      class="feed-avatar"
+                    />`}
+              </div>
+              <div class="feeds-list-item-content">
+                <div class="feeds-list-item-title">
+                  ${feedGenerator.displayName}
+                </div>
+                ${feedGenerator.creator
+                  ? html`<div class="feeds-list-item-creator">
+                      by @${feedGenerator.creator.handle}
+                    </div>`
+                  : ""}
+                ${feedGenerator.description
+                  ? html`<div class="feeds-list-item-description">
+                      ${feedGenerator.description}
+                    </div>`
+                  : ""}
+              </div>
+            </div>
+          `,
+        )}
+      </div>`;
+    }
+
     function renderPage() {
       const currentUser = dataLayer.selectors.getCurrentUser();
       const numNotifications =
@@ -185,9 +248,11 @@ class SearchView extends View {
       const showResults = normalizedQuery.length > 0;
       const postStatus = dataLayer.requests.getStatus("loadPostSearch");
       const profileStatus = dataLayer.requests.getStatus("loadProfileSearch");
+      const feedStatus = dataLayer.requests.getStatus("loadFeedSearch");
       const postSearchResults = dataLayer.selectors.getPostSearchResults();
       const profileSearchResults =
         dataLayer.selectors.getProfileSearchResults();
+      const feedSearchResults = dataLayer.selectors.getFeedSearchResults();
 
       render(
         html`<div id="search-view">
@@ -210,7 +275,7 @@ class SearchView extends View {
                     autocapitalize="none"
                     autocomplete="off"
                     placeholder=${isAuthenticated
-                      ? "Search for users and posts"
+                      ? "Search for users, posts, and feeds"
                       : "Search for users"}
                     .value=${state.searchQuery}
                     @input=${(event) => handleSearchInput(event.target.value)}
@@ -230,7 +295,10 @@ class SearchView extends View {
                         tabs: [
                           { value: "profiles", label: "Profiles" },
                           ...(isAuthenticated
-                            ? [{ value: "posts", label: "Posts" }]
+                            ? [
+                                { value: "posts", label: "Posts" },
+                                { value: "feeds", label: "Feeds" },
+                              ]
                             : []),
                         ],
                         activeTab: state.activeTab,
@@ -267,6 +335,17 @@ class SearchView extends View {
                               })}
                             </div>
                           </div>
+                          <div
+                            class="search-tab-panel"
+                            ?hidden=${state.activeTab !== "feeds"}
+                          >
+                            <div class="search-results-panel">
+                              ${feedSearchResultsTemplate({
+                                status: feedStatus,
+                                feedSearchResults,
+                              })}
+                            </div>
+                          </div>
                         </div>
                       `
                     : html`<div class="search-placeholder">
@@ -275,7 +354,7 @@ class SearchView extends View {
                         </div>
                         <div class="search-placeholder-text">
                           ${isAuthenticated
-                            ? "Start typing to search for users and posts."
+                            ? "Start typing to search for users, posts, and feeds."
                             : html`Start typing to search for users.<br />Sign
                                 in to search for posts.`}
                         </div>
