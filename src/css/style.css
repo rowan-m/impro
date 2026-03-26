@@ -3974,6 +3974,24 @@ emoji-picker {
   -webkit-box-orient: vertical;
 }
 
+.feed-menu-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-color-muted);
+  font-size: 18px;
+  font-weight: 600;
+  padding: 0 4px;
+  position: relative;
+  top: -2px;
+  margin-right: 12px;
+}
+
+.feed-menu-button span {
+  position: relative;
+  top: -2px;
+}
+
 .pin-feed-button {
   width: 24px;
   height: 24px;

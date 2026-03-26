@@ -10,6 +10,9 @@ import { pinIconTemplate } from "/js/templates/icons/pinIcon.template.js";
 import { PostInteractionHandler } from "/js/postInteractionHandler.js";
 import { FEED_PAGE_SIZE } from "/js/config.js";
 import { showToast } from "/js/toasts.js";
+import "/js/components/context-menu.js";
+import "/js/components/context-menu-item.js";
+import "/js/components/context-menu-item-group.js";
 
 class FeedDetailView extends View {
   async render({
@@ -107,12 +110,41 @@ class FeedDetailView extends View {
                 title: feedName,
                 subtitle: feedAuthorHandle ? `@${feedAuthorHandle}` : "",
                 rightItemTemplate: () => {
+                  const feedLink = `https://bsky.app/profile/${feedAuthorHandle || handleOrDid}/feed/${rkey}`;
                   return html`<button
-                    class=${classnames("pin-feed-button", { pinned: isPinned })}
-                    @click=${() => handleClickPinFeed(!isPinned)}
-                  >
-                    ${pinIconTemplate({ filled: isPinned })}
-                  </button>`;
+                      class="feed-menu-button"
+                      @click=${function (e) {
+                        const contextMenu = this.nextElementSibling;
+                        contextMenu.open(e.clientX, e.clientY);
+                      }}
+                    >
+                      <span>...</span>
+                    </button>
+                    <context-menu>
+                      <context-menu-item
+                        @click=${() => {
+                          window.open(feedLink, "_blank");
+                        }}
+                      >
+                        Open in bsky.app
+                      </context-menu-item>
+                      <context-menu-item
+                        @click=${() => {
+                          navigator.clipboard.writeText(feedLink);
+                          showToast("Link copied to clipboard");
+                        }}
+                      >
+                        Copy link to feed
+                      </context-menu-item>
+                    </context-menu>
+                    <button
+                      class=${classnames("pin-feed-button", {
+                        pinned: isPinned,
+                      })}
+                      @click=${() => handleClickPinFeed(!isPinned)}
+                    >
+                      ${pinIconTemplate({ filled: isPinned })}
+                    </button>`;
                 },
               })}
               <main>
