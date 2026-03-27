@@ -186,7 +186,11 @@ class SearchView extends View {
       </div>`;
     }
 
-    function feedSearchResultsTemplate({ status, feedSearchResults, preferences }) {
+    function feedSearchResultsTemplate({
+      status,
+      feedSearchResults,
+      preferences,
+    }) {
       if (!feedSearchResults && status.loading) {
         return html`<div class="search-status-message">Searching feeds…</div>`;
       }
@@ -234,9 +238,8 @@ class SearchView extends View {
                     </div>`
                   : ""}
                 ${feedGenerator.description
-                  ? html`<div class="feeds-list-item-description">
-                      ${feedGenerator.description}
-                    </div>`
+                  ? // prettier-ignore
+                    html`<div class="feeds-list-item-description">${feedGenerator.description}</div>`
                   : ""}
               </div>
               <div class="feeds-list-item-actions">

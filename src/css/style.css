@@ -3963,15 +3963,15 @@ emoji-picker {
   font-size: 14px;
   color: var(--text-color-muted);
   margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .feeds-list-item-description {
   font-size: 14px;
   color: var(--text-secondary);
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: pre-wrap;
 }
 
 .feeds-list-item-actions {
