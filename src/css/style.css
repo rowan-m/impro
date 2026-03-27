@@ -4121,6 +4121,7 @@ emoji-picker {
 
 .bottom-sheet {
   border: var(--hair) solid var(--post-border-color);
+  border-bottom: none;
   border-radius: var(--sheet-border-radius) var(--sheet-border-radius) 0 0;
   background-color: light-dark(var(--white), var(--mid-gray));
   color: var(--text-color);
