@@ -4550,8 +4550,11 @@ context-menu-item:last-child {
 .context-menu-item-group {
   border: var(--hair) solid var(--post-border-color);
   border-radius: var(--square-button-radius);
-  margin-bottom: 12px;
   overflow: hidden;
+}
+
+context-menu-item-group:not(:last-child) .context-menu-item-group {
+  margin-bottom: 12px;
 }
 
 .context-menu-item-group .context-menu-item {
@@ -4650,6 +4653,7 @@ context-menu-item:last-child {
 
   context-menu-item-group:not(:last-child) .context-menu-item-group {
     border-bottom: var(--hair) solid var(--post-border-color);
+    margin-bottom: 0;
   }
 }
 
