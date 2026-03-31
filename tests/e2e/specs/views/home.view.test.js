@@ -910,9 +910,7 @@ test.describe("Home view", () => {
       );
     });
 
-    test("a blocked post shows a Post unavailable placeholder", async ({
-      page,
-    }) => {
+    test("a blocked post shows a Blocked placeholder", async ({ page }) => {
       const mockServer = new MockServer();
       const normalPost = createPost({
         uri: "at://did:plc:author1/app.bsky.feed.post/normal1",
