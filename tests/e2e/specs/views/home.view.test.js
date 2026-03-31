@@ -2,6 +2,7 @@ import { test, expect } from "../../base.js";
 import { login } from "../../helpers.js";
 import { MockServer } from "../../mockServer.js";
 import { createFeedGenerator, createPost } from "../../factories.js";
+import { userProfile } from "../../fixtures.js";
 
 test.describe("Home view", () => {
   test("should display Following tab and feed posts", async ({ page }) => {
@@ -1024,6 +1025,22 @@ test.describe("Home view", () => {
       await expect(view.locator('[data-testid="feed-item"]')).toHaveCount(1);
       await expect(view).not.toContainText("This should be hidden");
     });
+  });
+
+  test("should open post composer automatically on /intent/compose", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+
+    await page.goto("/intent/compose");
+
+    const composer = page.locator("post-composer .post-composer");
+    await expect(composer).toBeVisible({ timeout: 10000 });
+
+    await expect(page).toHaveURL("/");
   });
 
   test.describe("Show Less / Show More feedback", () => {

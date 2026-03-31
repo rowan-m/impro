@@ -23,7 +23,7 @@
       "name": "New Post",
       "short_name": "New Post",
       "description": "Compose new post",
-      "url": "/#newpost",
+      "url": "/intent/compose",
       "icons": [
         {
           "src": "/img/shortcut-newpost.png",
@@ -75,7 +75,7 @@
       "name": "Profile",
       "short_name": "Profile",
       "description": "View your profile",
-      "url": "/#profile",
+      "url": "/profile",
       "icons": [
         {
           "src": "/img/shortcuts/shortcut-profile.png",

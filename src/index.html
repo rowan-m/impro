@@ -159,6 +159,7 @@
 
       const router = new Router();
       router.addRoute("/", () => homeView);
+      router.addRoute("/intent/compose", () => homeView);
       router.addRoute("/login", () => loginView);
       router.addRoute("/notifications", () => notificationsView);
       router.addRoute("/messages/inbox", () => chatRequestsView);
@@ -191,6 +192,7 @@
         () => profileFollowingView,
       );
       router.addRoute("/profile/:handleOrDid", () => profileView);
+      router.addRoute("/profile", () => profileView); // current user profile
       router.addRoute("/settings", () => settingsView);
       router.addRoute("/settings/appearance", () => settingsAppearanceView);
       router.setNotFoundView(() => notFoundView);
@@ -239,39 +241,6 @@
       });
 
       await router.load(window.location.pathname ?? "/");
-
-      if (window.location.hash === "#newpost") {
-        if (session) {
-          // ensure the user profile is loaded before composing
-          await dataLayer.declarative.ensureCurrentUser();
-          const currentUser = dataLayer.selectors.getCurrentUser();
-          postComposerService.composePost({ currentUser });
-        }
-        // Remove hash from URL without triggering a reload or affecting back button
-        history.replaceState(
-          null,
-          "",
-          window.location.pathname + window.location.search,
-        );
-      } else if (window.location.hash === "#profile") {
-        if (session) {
-          // ensure the user profile is loaded before navigating
-          await dataLayer.declarative.ensureCurrentUser();
-          const currentUser = dataLayer.selectors.getCurrentUser();
-          history.replaceState(
-            null,
-            "",
-            window.location.pathname + window.location.search,
-          );
-          router.go(`/profile/${currentUser.did}`);
-        } else {
-          history.replaceState(
-            null,
-            "",
-            window.location.pathname + window.location.search,
-          );
-        }
-      }
 
       window.addEventListener("native-reload", () => {
         hapticsImpactLight();
