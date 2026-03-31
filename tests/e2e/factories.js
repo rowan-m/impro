@@ -1,3 +1,17 @@
+const TID_ALPHABET = "234567abcdefghijklmnopqrstuvwxyz";
+
+export function createTid(dateString) {
+  let tid = BigInt(new Date(dateString).getTime()) * 1000n;
+  tid = tid << 10n;
+  let result = "";
+  for (let i = 0; i < 13; i++) {
+    const remainder = tid % 32n;
+    result = TID_ALPHABET[Number(remainder)] + result;
+    tid = tid / 32n;
+  }
+  return result;
+}
+
 export function createConvo({
   id,
   otherMember,
