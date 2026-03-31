@@ -5685,6 +5685,7 @@ moderation-warning .toggle-content {
 @media (min-width: 800px) {
   .report-dialog {
     max-width: 480px;
+    top: 50%;
   }
 }
 
