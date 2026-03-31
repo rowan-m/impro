@@ -159,6 +159,7 @@
 
       const router = new Router();
       router.addRoute("/", () => homeView);
+      router.addRoute("/intent/compose", () => homeView);
       router.addRoute("/login", () => loginView);
       router.addRoute("/notifications", () => notificationsView);
       router.addRoute("/messages/inbox", () => chatRequestsView);
@@ -191,6 +192,7 @@
         () => profileFollowingView,
       );
       router.addRoute("/profile/:handleOrDid", () => profileView);
+      router.addRoute("/profile", () => profileView); // current user profile
       router.addRoute("/settings", () => settingsView);
       router.addRoute("/settings/appearance", () => settingsAppearanceView);
       router.setNotFoundView(() => notFoundView);

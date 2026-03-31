@@ -64,7 +64,11 @@ class ProfileView extends View {
 
     const { handleOrDid } = params;
     let profileDid = null;
-    if (handleOrDid.startsWith("did:")) {
+    // If no handle or did is provided, use the current user
+    if (!handleOrDid) {
+      const currentUser = await dataLayer.declarative.ensureCurrentUser();
+      profileDid = currentUser.did;
+    } else if (handleOrDid.startsWith("did:")) {
       profileDid = handleOrDid;
     } else {
       profileDid = await identityResolver.resolveHandle(handleOrDid);

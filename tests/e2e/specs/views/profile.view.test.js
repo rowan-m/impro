@@ -1199,6 +1199,22 @@ test.describe("Profile view", () => {
     });
   });
 
+  test("should navigate to user profile on /profile", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+
+    await page.goto("/profile");
+
+    const profileView = page.locator("#profile-view");
+    await expect(profileView).toBeVisible({ timeout: 10000 });
+
+    await expect(
+      profileView.locator('[data-testid="profile-name"]'),
+    ).toContainText(userProfile.displayName, { timeout: 10000 });
+  });
+
   test.describe("Labeler profiles", () => {
     test("should show '+ Subscribe' button on a labeler profile", async ({
       page,
