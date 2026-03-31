@@ -148,14 +148,11 @@ class SearchView extends View {
       >
         ${avatarTemplate({ author: profile })}
         <div class="profile-list-item-body">
-          <a
-            class="profile-list-item-name"
-            href="${linkToProfile(profile.handle)}"
-          >
+          <div class="profile-list-item-name">
             <span class="profile-list-item-display-name">
               ${displayName || profile.handle}
             </span>
-          </a>
+          </div>
           <div class="profile-list-item-handle">@${profile.handle}</div>
         </div>
       </div>`;
