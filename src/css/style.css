@@ -6126,7 +6126,13 @@ toggle-switch {
 }
 
 #notifications-view header {
-  padding-bottom: 0;
+  padding: 0;
+}
+
+#notifications-view header .header-title-container {
+  padding-top: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 #notifications-view header .bottom-item {
