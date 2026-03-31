@@ -202,16 +202,13 @@ export class ProfileInteractionHandler {
         },
       );
 
-      this._postNotificationsDialog.addEventListener(
-        "dialog-closed",
-        () => {
-          if (this._postNotificationsDialog) {
-            this._postNotificationsDialog.remove();
-            this._postNotificationsDialog = null;
-          }
-          resolve();
-        },
-      );
+      this._postNotificationsDialog.addEventListener("dialog-closed", () => {
+        if (this._postNotificationsDialog) {
+          this._postNotificationsDialog.remove();
+          this._postNotificationsDialog = null;
+        }
+        resolve();
+      });
 
       document.body.appendChild(this._postNotificationsDialog);
       this._postNotificationsDialog.open();

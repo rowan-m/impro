@@ -102,7 +102,6 @@ class ContextMenu extends Component {
     this.isOpen = false;
     this.render();
   }
-
 }
 
 ContextMenu.register();

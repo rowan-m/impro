@@ -526,9 +526,7 @@ function submitStepTemplate({
         ?disabled=${isSubmitting}
       >
         ${isSubmitting ? "Submitting..." : "Submit report"}
-        ${isSubmitting
-          ? html`<div class="loading-spinner"></div>`
-          : ""}
+        ${isSubmitting ? html`<div class="loading-spinner"></div>` : ""}
       </button>
       ${error ? html`<div class="report-error">${error}</div>` : null}
     </div>
@@ -798,7 +796,8 @@ class ReportDialog extends Component {
 
     enableDragToDismiss(dialog, {
       onClose: () => this.close(),
-      ignoreTouchTarget: (el) => el.tagName === "BUTTON" || el.tagName === "TEXTAREA",
+      ignoreTouchTarget: (el) =>
+        el.tagName === "BUTTON" || el.tagName === "TEXTAREA",
     });
   }
 

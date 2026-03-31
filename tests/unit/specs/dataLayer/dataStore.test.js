@@ -146,7 +146,10 @@ t.describe("Quoted Post Caching", (it) => {
     dataStore.setPosts([post]);
 
     assertEquals(dataStore.hasPost(quotedPostUri), true);
-    assertEquals(dataStore.getPost(quotedPostUri).record.text, "Quoted with media");
+    assertEquals(
+      dataStore.getPost(quotedPostUri).record.text,
+      "Quoted with media",
+    );
   });
 
   it("should not overwrite an existing post with quoted post data", () => {
@@ -196,7 +199,10 @@ t.describe("Quoted Post Caching", (it) => {
 
     dataStore.setPosts([post]);
 
-    assertEquals(dataStore.hasPost("at://did:plc:456/app.bsky.feed.post/blocked"), false);
+    assertEquals(
+      dataStore.hasPost("at://did:plc:456/app.bsky.feed.post/blocked"),
+      false,
+    );
   });
 
   it("should not cache when post has no embed", () => {

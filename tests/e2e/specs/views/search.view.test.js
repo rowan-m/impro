@@ -470,13 +470,17 @@ test.describe("Search view", () => {
 
     // First feed is pinned — should show "Unpin" with pinned class
     await expect(firstItem.locator(".pin-feed-button.pinned")).toBeVisible();
-    await expect(firstItem.locator(".pin-feed-button")).toContainText("Unpin feed");
+    await expect(firstItem.locator(".pin-feed-button")).toContainText(
+      "Unpin feed",
+    );
 
     // Second feed is not pinned — should show "Pin feed" with primary class
     await expect(
       secondItem.locator(".pin-feed-button.rounded-button-primary"),
     ).toBeVisible();
-    await expect(secondItem.locator(".pin-feed-button")).toContainText("Pin feed");
+    await expect(secondItem.locator(".pin-feed-button")).toContainText(
+      "Pin feed",
+    );
   });
 
   test("should not navigate to feed detail when clicking pin button", async ({

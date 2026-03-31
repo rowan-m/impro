@@ -903,9 +903,10 @@ test.describe("Profile view", () => {
       await page.goto(`/profile/${userProfile.did}`);
 
       const view = page.locator("#profile-view");
-      await expect(
-        view.locator('[data-testid="profile-name"]'),
-      ).toContainText("Test User", { timeout: 10000 });
+      await expect(view.locator('[data-testid="profile-name"]')).toContainText(
+        "Test User",
+        { timeout: 10000 },
+      );
       await expect(
         view.locator('[data-testid="post-notifications-button"]'),
       ).not.toBeVisible();
@@ -948,7 +949,9 @@ test.describe("Profile view", () => {
         '[data-testid="post-notifications-button"]',
       );
       await expect(bellButton).toBeVisible({ timeout: 10000 });
-      await expect(bellButton.locator(".notifications-icon:not(.filled)")).toBeVisible();
+      await expect(
+        bellButton.locator(".notifications-icon:not(.filled)"),
+      ).toBeVisible();
     });
 
     test("should show filled bell icon when subscribed", async ({ page }) => {
@@ -971,7 +974,9 @@ test.describe("Profile view", () => {
         '[data-testid="post-notifications-button"]',
       );
       await expect(bellButton).toBeVisible({ timeout: 10000 });
-      await expect(bellButton.locator(".notifications-icon.filled")).toBeVisible();
+      await expect(
+        bellButton.locator(".notifications-icon.filled"),
+      ).toBeVisible();
     });
 
     test("should open post notifications dialog when bell button is clicked", async ({
@@ -1154,7 +1159,9 @@ test.describe("Profile view", () => {
       const bellButton = view.locator(
         '[data-testid="post-notifications-button"]',
       );
-      await expect(bellButton.locator(".notifications-icon.filled")).toBeVisible();
+      await expect(
+        bellButton.locator(".notifications-icon.filled"),
+      ).toBeVisible();
     });
 
     test("should close dialog when close button is clicked", async ({
@@ -1171,9 +1178,7 @@ test.describe("Profile view", () => {
         .locator('[data-testid="post-notifications-button"]')
         .click({ timeout: 10000 });
 
-      await expect(
-        page.locator(".post-notifications-dialog"),
-      ).toBeVisible();
+      await expect(page.locator(".post-notifications-dialog")).toBeVisible();
 
       await page.locator(".post-notifications-dialog-close").click();
 
@@ -1190,9 +1195,10 @@ test.describe("Profile view", () => {
       await page.goto(`/profile/${otherUser.did}`);
 
       const view = page.locator("#profile-view");
-      await expect(
-        view.locator('[data-testid="profile-name"]'),
-      ).toContainText("Other User", { timeout: 10000 });
+      await expect(view.locator('[data-testid="profile-name"]')).toContainText(
+        "Other User",
+        { timeout: 10000 },
+      );
       await expect(
         view.locator('[data-testid="post-notifications-button"]'),
       ).not.toBeVisible();

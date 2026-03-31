@@ -118,7 +118,11 @@ class FeedDetailView extends View {
                       class=${classnames("pin-feed-button", {
                         pinned: isPinned,
                       })}
-                      @click=${() => feedInteractionHandler.handlePinFeed(feedUri, !isPinned)}
+                      @click=${() =>
+                        feedInteractionHandler.handlePinFeed(
+                          feedUri,
+                          !isPinned,
+                        )}
                     >
                       ${pinIconTemplate({ filled: isPinned })}
                     </button>`;

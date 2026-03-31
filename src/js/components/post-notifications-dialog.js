@@ -22,8 +22,7 @@ class PostNotificationsDialog extends Component {
   get _isDirty() {
     const initial = this.activitySubscription ?? { post: false, reply: false };
     return (
-      this._postEnabled !== initial.post ||
-      this._replyEnabled !== initial.reply
+      this._postEnabled !== initial.post || this._replyEnabled !== initial.reply
     );
   }
 

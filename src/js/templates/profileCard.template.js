@@ -128,7 +128,9 @@ export function profileCardTemplate({
                   onClickPostNotifications(profile);
                 }}
               >
-                ${notificationsIconTemplate({ filled: !!activitySubscription?.post })}
+                ${notificationsIconTemplate({
+                  filled: !!activitySubscription?.post,
+                })}
               </button>
               <button
                 class="rounded-button chat-button"

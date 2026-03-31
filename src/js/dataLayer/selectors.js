@@ -78,7 +78,12 @@ export class Selectors {
     if (feedURI === "following") {
       const currentUser = this.getCurrentUser();
       const preferences = this.getPreferences();
-      return filterFollowingFeed(hydratedFeed, currentUser, preferences, this.isAuthenticated);
+      return filterFollowingFeed(
+        hydratedFeed,
+        currentUser,
+        preferences,
+        this.isAuthenticated,
+      );
     } else {
       return filterAlgorithmicFeed(hydratedFeed, this.isAuthenticated);
     }

@@ -186,9 +186,7 @@ class SearchView extends View {
         }}
         ?disabled=${!postSearchHasMore}
       >
-        <div
-          class=${classnames("loading-area", { loading: status.loading })}
-        >
+        <div class=${classnames("loading-area", { loading: status.loading })}>
           ${postSearchResults.map(
             (post) =>
               html`<div class="feed-item" data-post-uri="${post.uri}">

@@ -10,7 +10,10 @@ test.use({
 
 // Dispatches a touchstart→touchmove→touchend sequence on eventSourceSelector.
 // startTouchTarget optionally specifies a child element for touchstart (to test ignoreTouchTarget).
-async function drag(page, { eventSourceSelector, startTouchTargetSelector, startY, endY }) {
+async function drag(
+  page,
+  { eventSourceSelector, startTouchTargetSelector, startY, endY },
+) {
   await page.evaluate(
     ({ eventSourceSelector, startTouchTargetSelector, startY, endY }) => {
       const eventSource = document.querySelector(eventSourceSelector);
@@ -22,14 +25,28 @@ async function drag(page, { eventSourceSelector, startTouchTargetSelector, start
 
       startTarget.dispatchEvent(
         new TouchEvent("touchstart", {
-          touches: [new Touch({ identifier: 1, target: startTarget, clientX, clientY: startY })],
+          touches: [
+            new Touch({
+              identifier: 1,
+              target: startTarget,
+              clientX,
+              clientY: startY,
+            }),
+          ],
           bubbles: true,
           cancelable: true,
         }),
       );
       eventSource.dispatchEvent(
         new TouchEvent("touchmove", {
-          touches: [new Touch({ identifier: 1, target: startTarget, clientX, clientY: endY })],
+          touches: [
+            new Touch({
+              identifier: 1,
+              target: startTarget,
+              clientX,
+              clientY: endY,
+            }),
+          ],
           bubbles: true,
           cancelable: true,
         }),
@@ -37,7 +54,12 @@ async function drag(page, { eventSourceSelector, startTouchTargetSelector, start
       eventSource.dispatchEvent(
         new TouchEvent("touchend", {
           changedTouches: [
-            new Touch({ identifier: 1, target: startTarget, clientX, clientY: endY }),
+            new Touch({
+              identifier: 1,
+              target: startTarget,
+              clientX,
+              clientY: endY,
+            }),
           ],
           bubbles: true,
           cancelable: true,
@@ -69,8 +91,12 @@ test.describe("Drag-to-dismiss", () => {
   test.describe("report dialog", () => {
     async function openReportDialog(page) {
       await setupFeedWithPost(page);
-      await page.locator('#home-view [data-testid="feed-item"] .text-button').click();
-      await page.locator("context-menu-item", { hasText: "Report post" }).click();
+      await page
+        .locator('#home-view [data-testid="feed-item"] .text-button')
+        .click();
+      await page
+        .locator("context-menu-item", { hasText: "Report post" })
+        .click();
       const reportDialog = page.locator("report-dialog .report-dialog");
       await expect(reportDialog).toBeVisible({ timeout: 5000 });
       return reportDialog;
@@ -83,7 +109,9 @@ test.describe("Drag-to-dismiss", () => {
         startY: 300,
         endY: 400,
       });
-      await expect(page.locator("report-dialog .report-dialog")).not.toBeVisible({
+      await expect(
+        page.locator("report-dialog .report-dialog"),
+      ).not.toBeVisible({
         timeout: 2000,
       });
     });
@@ -113,7 +141,9 @@ test.describe("Drag-to-dismiss", () => {
   test.describe("context menu", () => {
     async function openContextMenu(page) {
       await setupFeedWithPost(page);
-      await page.locator('#home-view [data-testid="feed-item"] .text-button').click();
+      await page
+        .locator('#home-view [data-testid="feed-item"] .text-button')
+        .click();
       const contextMenu = page.locator("context-menu .context-menu[open]");
       await expect(contextMenu).toBeVisible({ timeout: 5000 });
       return contextMenu;
@@ -126,7 +156,9 @@ test.describe("Drag-to-dismiss", () => {
         startY: 300,
         endY: 400,
       });
-      await expect(page.locator("context-menu .context-menu[open]")).not.toBeVisible({
+      await expect(
+        page.locator("context-menu .context-menu[open]"),
+      ).not.toBeVisible({
         timeout: 2000,
       });
     });
@@ -184,9 +216,7 @@ test.describe("Drag-to-dismiss", () => {
         endY: 700,
       });
       await expect(
-        page.locator(
-          "post-notifications-dialog .post-notifications-dialog",
-        ),
+        page.locator("post-notifications-dialog .post-notifications-dialog"),
       ).not.toBeVisible({ timeout: 2000 });
     });
 
@@ -235,7 +265,9 @@ test.describe("Drag-to-dismiss", () => {
         startY: 300,
         endY: 400,
       });
-      await expect(page.locator("post-composer .post-composer")).not.toBeVisible({
+      await expect(
+        page.locator("post-composer .post-composer"),
+      ).not.toBeVisible({
         timeout: 2000,
       });
     });

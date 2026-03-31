@@ -719,33 +719,30 @@ export class MockServer {
       },
     );
 
-    await page.route(
-      "**/xrpc/app.bsky.feed.getActorFeeds*",
-      (route) => {
-        const url = new URL(route.request().url());
-        const actor = url.searchParams.get("actor") || "";
-        const cursor = url.searchParams.get("cursor") || "";
-        const limit = parseInt(url.searchParams.get("limit") || "0", 10);
-        const offset = cursor ? parseInt(cursor, 10) : 0;
-        const allFeeds = this.actorFeeds.get(actor) || [];
+    await page.route("**/xrpc/app.bsky.feed.getActorFeeds*", (route) => {
+      const url = new URL(route.request().url());
+      const actor = url.searchParams.get("actor") || "";
+      const cursor = url.searchParams.get("cursor") || "";
+      const limit = parseInt(url.searchParams.get("limit") || "0", 10);
+      const offset = cursor ? parseInt(cursor, 10) : 0;
+      const allFeeds = this.actorFeeds.get(actor) || [];
 
-        let feeds, nextCursor;
-        if (limit) {
-          feeds = allFeeds.slice(offset, offset + limit);
-          nextCursor =
-            offset + limit < allFeeds.length ? String(offset + limit) : "";
-        } else {
-          feeds = allFeeds;
-          nextCursor = "";
-        }
+      let feeds, nextCursor;
+      if (limit) {
+        feeds = allFeeds.slice(offset, offset + limit);
+        nextCursor =
+          offset + limit < allFeeds.length ? String(offset + limit) : "";
+      } else {
+        feeds = allFeeds;
+        nextCursor = "";
+      }
 
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ feeds, cursor: nextCursor }),
-        });
-      },
-    );
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ feeds, cursor: nextCursor }),
+      });
+    });
 
     await page.route("**/xrpc/app.bsky.feed.searchPosts*", (route) => {
       const url = new URL(route.request().url());
