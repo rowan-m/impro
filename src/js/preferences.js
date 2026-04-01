@@ -365,6 +365,17 @@ export class Preferences {
     return clone;
   }
 
+  updateMutedWord(wordId, updatedFields) {
+    const clone = this.clone();
+    const mutedWordsPreference = Preferences.getMutedWordsPreference(clone.obj);
+    if (mutedWordsPreference) {
+      mutedWordsPreference.items = mutedWordsPreference.items.map((item) =>
+        item.id === wordId ? { ...item, ...updatedFields } : item,
+      );
+    }
+    return clone;
+  }
+
   hasMutedWord({ text, facets, embed, languages, author }) {
     const mutedWordsPreference = Preferences.getMutedWordsPreference(this.obj);
     if (!mutedWordsPreference) {

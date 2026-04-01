@@ -5,6 +5,9 @@ import { requireAuth } from "/js/auth.js";
 import { mainLayoutTemplate } from "/js/templates/mainLayout.template.js";
 import { confirm } from "/js/modals.js";
 import { differenceInHours, differenceInDays } from "/js/utils.js";
+import "/js/components/context-menu.js";
+import "/js/components/context-menu-item.js";
+import "/js/components/context-menu-label.js";
 
 class SettingsMutedWordsView extends View {
   async render({
@@ -18,6 +21,7 @@ class SettingsMutedWordsView extends View {
       hasValue: false,
       isSaving: false,
       removingWordId: null,
+      renewingWordId: null,
     };
 
     function sanitizeMutedWordValue(value) {
@@ -116,7 +120,37 @@ class SettingsMutedWordsView extends View {
       }
     }
 
-    function renderMutedWordItem(word) {
+    async function handleRenew(word, duration) {
+      const now = Date.now();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      let expiresAt;
+      if (duration === "24_hours") {
+        expiresAt = new Date(now + oneDayMs).toISOString();
+      } else if (duration === "7_days") {
+        expiresAt = new Date(now + 7 * oneDayMs).toISOString();
+      } else if (duration === "30_days") {
+        expiresAt = new Date(now + 30 * oneDayMs).toISOString();
+      }
+
+      state.renewingWordId = word.id;
+      renderPage();
+      try {
+        await dataLayer.mutations.updateMutedWord(word.id, { expiresAt });
+      } catch (err) {
+        state.error = err.message || "Failed to renew muted word";
+      } finally {
+        state.renewingWordId = null;
+        renderPage();
+      }
+    }
+
+    function mutedWordItemTemplate({
+      word,
+      isRemoving,
+      isRenewing,
+      onRemove,
+      onRenew,
+    }) {
       const targetLabel = word.targets.includes("content")
         ? "text & tags"
         : "tags";
@@ -129,7 +163,8 @@ class SettingsMutedWordsView extends View {
       if (hasExcludeFollowing) {
         metaParts.push("Excludes users you follow");
       }
-      const isRemoving = state.removingWordId === word.id;
+      const expirationDate = word.expiresAt ? new Date(word.expiresAt) : null;
+      const isExpired = expirationDate && expirationDate < new Date();
 
       return html`
         <div class="muted-word-item" data-testid="muted-word-item">
@@ -144,15 +179,55 @@ class SettingsMutedWordsView extends View {
                 </div>`
               : ""}
           </div>
-          <button
-            class="muted-word-delete-button"
-            data-testid="muted-word-delete"
-            ?disabled=${isRemoving}
-            @click=${() => handleRemove(word)}
-            aria-label="Remove muted word"
-          >
-            ${isRemoving ? html`<div class="loading-spinner"></div>` : "\u00d7"}
-          </button>
+          <div class="muted-word-item-actions">
+            ${isExpired
+              ? html`
+                  <button
+                    class="muted-word-renew-button"
+                    data-testid="muted-word-renew"
+                    ?disabled=${isRenewing}
+                    aria-label="Renew muted word"
+                    @click=${function (e) {
+                      e.stopPropagation();
+                      const contextMenu = this.nextElementSibling;
+                      contextMenu.open(e.clientX, e.clientY);
+                    }}
+                  >
+                    ${isRenewing
+                      ? html`<div class="loading-spinner"></div>`
+                      : "Renew"}
+                  </button>
+                  <context-menu>
+                    <context-menu-label> Renew duration </context-menu-label>
+                    <context-menu-item
+                      @click=${() => onRenew(word, "24_hours")}
+                    >
+                      24 hours
+                    </context-menu-item>
+                    <context-menu-item @click=${() => onRenew(word, "7_days")}>
+                      7 days
+                    </context-menu-item>
+                    <context-menu-item @click=${() => onRenew(word, "30_days")}>
+                      30 days
+                    </context-menu-item>
+                    <context-menu-item @click=${() => onRenew(word, "forever")}>
+                      Forever
+                    </context-menu-item>
+                  </context-menu>
+                `
+              : ""}
+            <button
+              class="muted-word-delete-button"
+              data-testid="muted-word-delete"
+              ?disabled=${isRemoving}
+              @click=${() => onRemove(word)}
+              aria-label="Remove muted word"
+            >
+              ${isRemoving
+                ? html`<div class="loading-spinner"></div>`
+                : "\u00d7"}
+            </button>
+          </div>
         </div>
       `;
     }
@@ -282,7 +357,15 @@ class SettingsMutedWordsView extends View {
                       class="muted-word-list"
                       data-testid="muted-word-list"
                     >
-                      ${mutedWords.map((word) => renderMutedWordItem(word))}
+                      ${mutedWords.map((word) =>
+                        mutedWordItemTemplate({
+                          word,
+                          isRemoving: state.removingWordId === word.id,
+                          isRenewing: state.renewingWordId === word.id,
+                          onRemove: handleRemove,
+                          onRenew: handleRenew,
+                        }),
+                      )}
                     </div>`
                   : html`<div
                       class="muted-word-empty"

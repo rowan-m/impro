@@ -455,6 +455,94 @@ t.describe("Preferences.removeMutedWord", (it) => {
   });
 });
 
+t.describe("Preferences.updateMutedWord", (it) => {
+  it("should update a muted word by id", () => {
+    const obj = [
+      {
+        $type: "app.bsky.actor.defs#mutedWordsPref",
+        items: [
+          {
+            id: "1",
+            value: "word",
+            targets: ["content"],
+            actorTarget: "all",
+            expiresAt: "2025-01-01T00:00:00.000Z",
+          },
+          { id: "2", value: "other", targets: ["tag"], actorTarget: "all" },
+        ],
+      },
+    ];
+
+    const preferences = new Preferences(obj, []);
+    const newPreferences = preferences.updateMutedWord("1", {
+      expiresAt: "2026-06-01T00:00:00.000Z",
+    });
+
+    const words = newPreferences.getMutedWords();
+    assertEquals(words.length, 2);
+    assertEquals(words[0].expiresAt, "2026-06-01T00:00:00.000Z");
+    assertEquals(words[0].value, "word");
+    assertEquals(words[1].value, "other");
+  });
+
+  it("should not modify original preferences", () => {
+    const obj = [
+      {
+        $type: "app.bsky.actor.defs#mutedWordsPref",
+        items: [
+          {
+            id: "1",
+            value: "word",
+            targets: ["content"],
+            actorTarget: "all",
+            expiresAt: "2025-01-01T00:00:00.000Z",
+          },
+        ],
+      },
+    ];
+
+    const preferences = new Preferences(obj, []);
+    preferences.updateMutedWord("1", {
+      expiresAt: "2026-06-01T00:00:00.000Z",
+    });
+
+    assertEquals(
+      preferences.getMutedWords()[0].expiresAt,
+      "2025-01-01T00:00:00.000Z",
+    );
+  });
+
+  it("should handle updating non-existent id gracefully", () => {
+    const obj = [
+      {
+        $type: "app.bsky.actor.defs#mutedWordsPref",
+        items: [
+          { id: "1", value: "word", targets: ["content"], actorTarget: "all" },
+        ],
+      },
+    ];
+
+    const preferences = new Preferences(obj, []);
+    const newPreferences = preferences.updateMutedWord("nonexistent", {
+      expiresAt: "2026-06-01T00:00:00.000Z",
+    });
+
+    const words = newPreferences.getMutedWords();
+    assertEquals(words.length, 1);
+    assertEquals(words[0].expiresAt, undefined);
+  });
+
+  it("should return clone when no mutedWordsPref exists", () => {
+    const obj = [];
+    const preferences = new Preferences(obj, []);
+    const newPreferences = preferences.updateMutedWord("1", {
+      expiresAt: "2026-06-01T00:00:00.000Z",
+    });
+
+    assertEquals(newPreferences.getMutedWords().length, 0);
+  });
+});
+
 t.describe("Preferences.hasMutedWord", (it) => {
   it("should return true when text contains muted word", () => {
     const obj = [

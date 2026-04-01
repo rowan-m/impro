@@ -380,4 +380,100 @@ test.describe("Settings Muted Words view", () => {
       "Excludes users you follow",
     );
   });
+
+  test("should show renew button for expired muted words", async ({ page }) => {
+    const mockServer = new MockServer();
+    const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    mockServer.mutedWords = [
+      {
+        id: "word-1",
+        value: "expired-word",
+        targets: ["content", "tag"],
+        actorTarget: "all",
+        expiresAt: pastDate,
+      },
+    ];
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toBeVisible({ timeout: 10000 });
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Expired",
+    );
+    await expect(
+      item.locator('[data-testid="muted-word-renew"]'),
+    ).toBeVisible();
+  });
+
+  test("should not show renew button for non-expired muted words", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    const futureDate = new Date(
+      Date.now() + 3 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    mockServer.mutedWords = [
+      {
+        id: "word-1",
+        value: "active-word",
+        targets: ["content", "tag"],
+        actorTarget: "all",
+        expiresAt: futureDate,
+      },
+    ];
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toBeVisible({ timeout: 10000 });
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Expires in",
+    );
+    await expect(
+      item.locator('[data-testid="muted-word-renew"]'),
+    ).not.toBeVisible();
+  });
+
+  test("should renew an expired muted word via context menu", async ({
+    page,
+  }) => {
+    const mockServer = new MockServer();
+    const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    mockServer.mutedWords = [
+      {
+        id: "word-1",
+        value: "expired-word",
+        targets: ["content", "tag"],
+        actorTarget: "all",
+        expiresAt: pastDate,
+      },
+    ];
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toBeVisible({ timeout: 10000 });
+
+    await item.locator('[data-testid="muted-word-renew"]').click();
+
+    const contextMenu = item.locator("context-menu");
+    await expect(contextMenu.locator("dialog")).toBeVisible({ timeout: 5000 });
+
+    await contextMenu.locator("context-menu-item").nth(1).click();
+
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Expires in",
+      { timeout: 10000 },
+    );
+  });
 });

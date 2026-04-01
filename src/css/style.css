@@ -527,7 +527,7 @@ main {
   width: fit-content;
 }
 
-form input {
+form input:not([type="radio"]):not([type="checkbox"]) {
   width: 100%;
   padding: 12px;
   border-radius: var(--text-input-border-radius);
@@ -4579,6 +4579,24 @@ context-menu-item:last-child {
   margin-bottom: 0;
 }
 
+.context-menu-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color-muted);
+  white-space: nowrap;
+  padding-bottom: 8px;
+  padding-top: 4px;
+}
+
+@media (min-width: 800px) {
+  .context-menu-label {
+    padding: 12px 14px 4px;
+    font-size: inherit;
+    font-weight: normal;
+    color: var(--text-color-muted);
+  }
+}
+
 .context-menu-item {
   margin-bottom: 12px;
   white-space: nowrap;
@@ -5287,7 +5305,6 @@ img[data-lightbox] {
 
 .muted-word-radio-group label {
   flex: 1;
-  min-width: calc(50% - 4px);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -5420,6 +5437,30 @@ img[data-lightbox] {
   color: var(--text-color-muted);
   line-height: 1.4;
   margin-top: 2px;
+}
+
+.muted-word-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.muted-word-renew-button {
+  padding: 4px 12px;
+  border-radius: 14px;
+  border: var(--hair) solid var(--post-border-color);
+  background: none;
+  color: var(--link-color);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.muted-word-renew-button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .muted-word-delete-button {
