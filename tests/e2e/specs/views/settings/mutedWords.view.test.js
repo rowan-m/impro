@@ -201,6 +201,163 @@ test.describe("Settings Muted Words view", () => {
     );
   });
 
+  test("should add a muted word with duration", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    await expect(view.locator('[data-testid="muted-word-empty"]')).toBeVisible({
+      timeout: 10000,
+    });
+
+    await view.locator('[data-testid="muted-word-input"]').fill("spoiler");
+    await view
+      .locator('[data-testid="duration-group"] input[value="7_days"]')
+      .check();
+    await view.locator('[data-testid="muted-word-add"]').click();
+
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toHaveCount(1, { timeout: 10000 });
+    await expect(item).toContainText("spoiler");
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Expires in",
+    );
+  });
+
+  test("should add a muted word with tags-only target", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    await expect(view.locator('[data-testid="muted-word-empty"]')).toBeVisible({
+      timeout: 10000,
+    });
+
+    await view.locator('[data-testid="muted-word-input"]').fill("politics");
+    await view
+      .locator('[data-testid="target-group"] input[value="tag"]')
+      .check();
+    await view.locator('[data-testid="muted-word-add"]').click();
+
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toHaveCount(1, { timeout: 10000 });
+    await expect(item).toContainText("politics");
+    await expect(item).toContainText("in tags");
+  });
+
+  test("should add a muted word with exclude-following", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    await expect(view.locator('[data-testid="muted-word-empty"]')).toBeVisible({
+      timeout: 10000,
+    });
+
+    await view.locator('[data-testid="muted-word-input"]').fill("discourse");
+    await view
+      .locator('[data-testid="exclude-following"] input[type="checkbox"]')
+      .check();
+    await view.locator('[data-testid="muted-word-add"]').click();
+
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toHaveCount(1, { timeout: 10000 });
+    await expect(item).toContainText("discourse");
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Excludes users you follow",
+    );
+  });
+
+  test("should add a muted word with all options set", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    await expect(view.locator('[data-testid="muted-word-empty"]')).toBeVisible({
+      timeout: 10000,
+    });
+
+    await view.locator('[data-testid="muted-word-input"]').fill("drama");
+    await view
+      .locator('[data-testid="duration-group"] input[value="24_hours"]')
+      .check();
+    await view
+      .locator('[data-testid="target-group"] input[value="tag"]')
+      .check();
+    await view
+      .locator('[data-testid="exclude-following"] input[type="checkbox"]')
+      .check();
+    await view.locator('[data-testid="muted-word-add"]').click();
+
+    const item = view.locator('[data-testid="muted-word-item"]');
+    await expect(item).toHaveCount(1, { timeout: 10000 });
+    await expect(item).toContainText("drama");
+    await expect(item).toContainText("in tags");
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Expires in",
+    );
+    await expect(item.locator(".muted-word-item-meta")).toContainText(
+      "Excludes users you follow",
+    );
+  });
+
+  test("should reset form options after adding a word", async ({ page }) => {
+    const mockServer = new MockServer();
+    await mockServer.setup(page);
+
+    await login(page);
+    await page.goto("/settings/muted-words");
+
+    const view = page.locator("#settings-muted-words-view");
+    await expect(view.locator('[data-testid="muted-word-empty"]')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Set non-default options
+    await view.locator('[data-testid="muted-word-input"]').fill("first");
+    await view
+      .locator('[data-testid="duration-group"] input[value="30_days"]')
+      .check();
+    await view
+      .locator('[data-testid="target-group"] input[value="tag"]')
+      .check();
+    await view
+      .locator('[data-testid="exclude-following"] input[type="checkbox"]')
+      .check();
+    await view.locator('[data-testid="muted-word-add"]').click();
+
+    await expect(view.locator('[data-testid="muted-word-item"]')).toHaveCount(
+      1,
+      { timeout: 10000 },
+    );
+
+    // Verify form reset to defaults
+    await expect(
+      view.locator('[data-testid="duration-group"] input[value="forever"]'),
+    ).toBeChecked();
+    await expect(
+      view.locator('[data-testid="target-group"] input[value="content"]'),
+    ).toBeChecked();
+    await expect(
+      view.locator('[data-testid="exclude-following"] input[type="checkbox"]'),
+    ).not.toBeChecked();
+    await expect(view.locator('[data-testid="muted-word-input"]')).toHaveValue(
+      "",
+    );
+  });
+
   test("should display exclude-following label", async ({ page }) => {
     const mockServer = new MockServer();
     mockServer.mutedWords = [

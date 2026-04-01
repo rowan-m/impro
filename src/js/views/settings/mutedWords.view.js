@@ -60,12 +60,13 @@ class SettingsMutedWordsView extends View {
       const duration = formData.get("duration");
       let expiresAt;
       const now = Date.now();
+      const oneDayMs = 24 * 60 * 60 * 1000;
       if (duration === "24_hours") {
-        expiresAt = new Date(now + ONE_DAY).toISOString();
+        expiresAt = new Date(now + oneDayMs).toISOString();
       } else if (duration === "7_days") {
-        expiresAt = new Date(now + 7 * ONE_DAY).toISOString();
+        expiresAt = new Date(now + 7 * oneDayMs).toISOString();
       } else if (duration === "30_days") {
-        expiresAt = new Date(now + 30 * ONE_DAY).toISOString();
+        expiresAt = new Date(now + 30 * oneDayMs).toISOString();
       }
 
       state.isSaving = true;
