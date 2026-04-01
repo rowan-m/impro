@@ -18,6 +18,7 @@ export class MockServer {
     this.hiddenPostUris = [];
     this.labelerSubscriptions = [];
     this.labelerViews = [bskyLabeler];
+    this.mutedWords = [];
     this.contentLabelPrefs = [];
     this.notifications = [];
     this.notificationCursor = undefined;
@@ -225,6 +226,14 @@ export class MockServer {
                 ]
               : []),
             ...this.contentLabelPrefs,
+            ...(this.mutedWords.length > 0
+              ? [
+                  {
+                    $type: "app.bsky.actor.defs#mutedWordsPref",
+                    items: this.mutedWords,
+                  },
+                ]
+              : []),
           ],
         }),
       }),
@@ -1289,6 +1298,12 @@ export class MockServer {
       this.contentLabelPrefs = (body?.preferences || []).filter(
         (p) => p.$type === "app.bsky.actor.defs#contentLabelPref",
       );
+      const mutedWordsPref = body?.preferences?.find(
+        (p) => p.$type === "app.bsky.actor.defs#mutedWordsPref",
+      );
+      if (mutedWordsPref) {
+        this.mutedWords = mutedWordsPref.items || [];
+      }
       return route.fulfill({
         status: 200,
         contentType: "application/json",

@@ -328,6 +328,43 @@ export class Preferences {
     return hiddenPostsPreference.items.includes(postUri);
   }
 
+  getMutedWords() {
+    const mutedWordsPreference = Preferences.getMutedWordsPreference(this.obj);
+    return mutedWordsPreference ? mutedWordsPreference.items : [];
+  }
+
+  addMutedWord({ value, targets, actorTarget, expiresAt }) {
+    const clone = this.clone();
+    let mutedWordsPreference = Preferences.getMutedWordsPreference(clone.obj);
+    if (!mutedWordsPreference) {
+      mutedWordsPreference = {
+        $type: "app.bsky.actor.defs#mutedWordsPref",
+        items: [],
+      };
+      clone.obj.push(mutedWordsPreference);
+    }
+    mutedWordsPreference.items.push({
+      id: generateTid(),
+      value,
+      targets,
+      actorTarget,
+      expiresAt,
+    });
+    return clone;
+  }
+
+  removeMutedWord(wordId) {
+    const clone = this.clone();
+    const mutedWordsPreference = Preferences.getMutedWordsPreference(clone.obj);
+    if (!mutedWordsPreference) {
+      return clone;
+    }
+    mutedWordsPreference.items = mutedWordsPreference.items.filter(
+      (item) => item.id !== wordId,
+    );
+    return clone;
+  }
+
   hasMutedWord({ text, facets, embed, languages, author }) {
     const mutedWordsPreference = Preferences.getMutedWordsPreference(this.obj);
     if (!mutedWordsPreference) {
