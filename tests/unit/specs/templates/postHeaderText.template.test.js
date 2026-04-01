@@ -10,7 +10,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render header with author name", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       includeTime: true,
     });
     const container = document.createElement("div");
@@ -26,7 +26,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render header with author handle", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       includeTime: true,
     });
     const container = document.createElement("div");
@@ -42,7 +42,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render header with time", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       includeTime: true,
     });
     const container = document.createElement("div");
@@ -53,7 +53,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render header without time when includeTime is false", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       includeTime: false,
     });
     const container = document.createElement("div");
@@ -64,7 +64,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render header without handle when includeHandle is false", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       includeHandle: false,
     });
     const container = document.createElement("div");
@@ -79,7 +79,7 @@ t.describe("postHeaderTextTemplate", (it) => {
     const authorWithoutDisplayName = { ...post.author, displayName: null };
     const result = postHeaderTextTemplate({
       author: authorWithoutDisplayName,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
     });
     const container = document.createElement("div");
     render(result, container);
@@ -94,7 +94,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render as link when enableProfileLink is true", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       enableProfileLink: true,
     });
     const container = document.createElement("div");
@@ -108,7 +108,7 @@ t.describe("postHeaderTextTemplate", (it) => {
   it("should render as span when enableProfileLink is false", () => {
     const result = postHeaderTextTemplate({
       author: post.author,
-      timestamp: post.record.createdAt,
+      timestamp: post.indexedAt,
       enableProfileLink: false,
     });
     const container = document.createElement("div");

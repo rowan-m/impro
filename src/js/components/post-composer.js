@@ -41,7 +41,7 @@ function replyToTemplate({ post }) {
         <div class="post-content-right">
           ${postHeaderTextTemplate({
             author: post.author,
-            timestamp: post.record.createdAt,
+            timestamp: post.indexedAt,
             includeHandle: false,
             includeTime: false,
           })}
@@ -70,7 +70,7 @@ function quotedPostTemplate({ post }) {
           ${avatarTemplate({ author: post.author, clickAction: "none" })}
           ${postHeaderTextTemplate({
             author: post.author,
-            timestamp: post.record.createdAt,
+            timestamp: post.indexedAt,
             enableProfileLink: false,
           })}
         </div>

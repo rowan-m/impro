@@ -109,7 +109,7 @@ export function smallPostTemplate({
             : ""}
           ${postHeaderTextTemplate({
             author: post.author,
-            timestamp: post.record.createdAt,
+            timestamp: post.indexedAt,
           })}
           ${post.badgeLabels
             ? postLabelsTemplate({ badgeLabels: post.badgeLabels })
