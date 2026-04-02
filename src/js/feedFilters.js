@@ -301,8 +301,7 @@ export function filterAlgorithmicFeed(feed, isAuthenticated) {
 }
 
 export function filterAuthorFeed(feed, isAuthenticated) {
-  let filteredFeed = dedupeFeed(feed);
-  filteredFeed = filterEmptyPosts(filteredFeed);
+  let filteredFeed = filterEmptyPosts(feed);
   filteredFeed = filterHiddenPosts(filteredFeed);
   filteredFeed = filterContentLabeledPosts(filteredFeed);
   filteredFeed = filterUnauthorizedPosts(filteredFeed, isAuthenticated);

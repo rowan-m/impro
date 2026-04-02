@@ -197,38 +197,6 @@ t.describe("filterAlgorithmicFeed", (it) => {
 });
 
 t.describe("filterAuthorFeed", (it) => {
-  it("should deduplicate posts", () => {
-    const rootUri = "at://did:plc:root/app.bsky.feed.post/123";
-    const items = [
-      createFeedItem({ post: { uri: rootUri } }),
-      createFeedItem({ post: { uri: rootUri } }),
-    ];
-    const feed = createFeed(items);
-
-    const result = filterAuthorFeed(feed, true);
-
-    assertEquals(result.feed.length, 1);
-  });
-
-  it("should preserve non-duplicate posts", () => {
-    const items = [
-      createFeedItem({
-        post: { uri: "at://did:plc:test/app.bsky.feed.post/1" },
-      }),
-      createFeedItem({
-        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
-      }),
-      createFeedItem({
-        post: { uri: "at://did:plc:test/app.bsky.feed.post/3" },
-      }),
-    ];
-    const feed = createFeed(items);
-
-    const result = filterAuthorFeed(feed, true);
-
-    assertEquals(result.feed.length, 3);
-  });
-
   it("should preserve cursor", () => {
     const feed = createFeed([], "author-cursor");
 
