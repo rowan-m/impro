@@ -656,6 +656,211 @@ t.describe("filterAuthorFeed - content label filtering", (it) => {
   });
 });
 
+t.describe("filterFollowingFeed - badge label filtering", (it) => {
+  it("should filter posts with badge label visibility hide", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          badgeLabels: [{ visibility: "hide" }],
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+    const currentUser = createCurrentUser();
+    const preferences = createPreferences();
+
+    const result = filterFollowingFeed(feed, currentUser, preferences, true);
+
+    assertEquals(result.feed.length, 1);
+    assertEquals(
+      result.feed[0].post.uri,
+      "at://did:plc:test/app.bsky.feed.post/2",
+    );
+  });
+
+  it("should keep posts with badge label visibility warn", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          badgeLabels: [{ visibility: "warn" }],
+        },
+      }),
+    ];
+    const feed = createFeed(items);
+    const currentUser = createCurrentUser();
+    const preferences = createPreferences();
+
+    const result = filterFollowingFeed(feed, currentUser, preferences, true);
+
+    assertEquals(result.feed.length, 1);
+  });
+
+  it("should filter posts with quoted post badge label visibility hide", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          embed: {
+            $type: "app.bsky.embed.record#view",
+            record: {
+              uri: "at://did:plc:other/app.bsky.feed.post/quoted",
+              badgeLabels: [{ visibility: "hide" }],
+            },
+          },
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+    const currentUser = createCurrentUser();
+    const preferences = createPreferences();
+
+    const result = filterFollowingFeed(feed, currentUser, preferences, true);
+
+    assertEquals(result.feed.length, 1);
+    assertEquals(
+      result.feed[0].post.uri,
+      "at://did:plc:test/app.bsky.feed.post/2",
+    );
+  });
+
+  it("should keep posts with quoted post badge label visibility warn", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          embed: {
+            $type: "app.bsky.embed.record#view",
+            record: {
+              uri: "at://did:plc:other/app.bsky.feed.post/quoted",
+              badgeLabels: [{ visibility: "warn" }],
+            },
+          },
+        },
+      }),
+    ];
+    const feed = createFeed(items);
+    const currentUser = createCurrentUser();
+    const preferences = createPreferences();
+
+    const result = filterFollowingFeed(feed, currentUser, preferences, true);
+
+    assertEquals(result.feed.length, 1);
+  });
+
+  it("should filter if any badge label has hide visibility", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          badgeLabels: [{ visibility: "warn" }, { visibility: "hide" }],
+        },
+      }),
+    ];
+    const feed = createFeed(items);
+    const currentUser = createCurrentUser();
+    const preferences = createPreferences();
+
+    const result = filterFollowingFeed(feed, currentUser, preferences, true);
+
+    assertEquals(result.feed.length, 0);
+  });
+});
+
+t.describe("filterAlgorithmicFeed - badge label filtering", (it) => {
+  it("should filter posts with badge label visibility hide", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          badgeLabels: [{ visibility: "hide" }],
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterAlgorithmicFeed(feed, true);
+
+    assertEquals(result.feed.length, 1);
+  });
+});
+
+t.describe("filterAuthorFeed - badge label filtering", (it) => {
+  it("should filter posts with badge label visibility hide", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          badgeLabels: [{ visibility: "hide" }],
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterAuthorFeed(feed, true);
+
+    assertEquals(result.feed.length, 1);
+  });
+
+  it("should filter posts with badge label hide on quoted post", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          embed: {
+            $type: "app.bsky.embed.record#view",
+            record: {
+              uri: "at://did:plc:other/app.bsky.feed.post/quoted",
+              badgeLabels: [{ visibility: "hide" }],
+            },
+          },
+        },
+      }),
+      createFeedItem({
+        post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterAuthorFeed(feed, true);
+
+    assertEquals(result.feed.length, 1);
+    assertEquals(
+      result.feed[0].post.uri,
+      "at://did:plc:test/app.bsky.feed.post/2",
+    );
+  });
+
+  it("should keep posts with badge label warn", () => {
+    const items = [
+      createFeedItem({
+        post: {
+          uri: "at://did:plc:test/app.bsky.feed.post/1",
+          badgeLabels: [{ visibility: "warn" }],
+        },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterAuthorFeed(feed, true);
+
+    assertEquals(result.feed.length, 1);
+  });
+});
+
 t.describe("filterFollowingFeed - unauthorized filtering", (it) => {
   it("should filter posts from no-unauthenticated authors when not authenticated", () => {
     const items = [

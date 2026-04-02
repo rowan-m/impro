@@ -242,14 +242,24 @@ function filterHiddenPosts(feed) {
   };
 }
 
+function hasHiddenBadgeLabel(post) {
+  return post?.badgeLabels?.some((badge) => badge.visibility === "hide");
+}
+
 function filterContentLabeledPosts(feed) {
   const filteredFeedItems = feed.feed.filter((item) => {
     const contentLabel = item.post.contentLabel;
     if (contentLabel?.visibility === "hide") {
       return false;
     }
+    if (hasHiddenBadgeLabel(item.post)) {
+      return false;
+    }
     const quotedPost = getQuotedPost(item.post);
     if (quotedPost?.contentLabel?.visibility === "hide") {
+      return false;
+    }
+    if (hasHiddenBadgeLabel(quotedPost)) {
       return false;
     }
     return true;

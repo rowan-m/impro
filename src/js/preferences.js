@@ -276,7 +276,10 @@ export class Preferences {
       if (!labeler) continue;
       const labelDefinition = getDefinitionForLabel(label, labeler);
       if (!labelDefinition || !isBadgeLabel(labelDefinition)) continue;
+      const visibility = this.getLabelVisibility(label, labelDefinition);
+      if (visibility === "ignore") continue;
       badgeLabels.push({
+        visibility,
         label,
         labelDefinition,
         labeler,
