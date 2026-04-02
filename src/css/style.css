@@ -5284,7 +5284,7 @@ img[data-lightbox] {
   border: var(--hair) solid var(--post-border-color);
   background: var(--text-input-background-color);
   color: var(--text-color);
-  font-size: 14px;
+  font-size: 16px;
   box-sizing: border-box;
   margin-bottom: 12px;
 }
@@ -5308,7 +5308,7 @@ img[data-lightbox] {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 12px 12px;
   border-radius: 8px;
   background: var(--post-hover-color);
   cursor: pointer;
@@ -5331,7 +5331,7 @@ img[data-lightbox] {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 12px 12px;
   border-radius: 8px;
   background: var(--post-hover-color);
   cursor: pointer;
