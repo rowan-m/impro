@@ -158,6 +158,30 @@ class NotificationsView extends View {
       return notificationGroups;
     }
 
+    function shouldHideNotificationGroup(notificationGroup) {
+      const { type, notifications } = notificationGroup;
+      if (
+        type === "like" ||
+        type === "repost" ||
+        type === "like-via-repost" ||
+        type === "repost-via-repost"
+      ) {
+        const subject = notifications[0]?.subject;
+        return !subject || isUnavailablePost(subject);
+      }
+      if (type === "reply" || type === "mention" || type === "quote") {
+        const post = notifications[0]?.post;
+        return !post || isUnavailablePost(post);
+      }
+      if (type === "subscribed-post") {
+        return (
+          !notificationGroup.subject ||
+          isUnavailablePost(notificationGroup.subject)
+        );
+      }
+      return false;
+    }
+
     function groupNotificationsByType(notifications) {
       if (!notifications) {
         return null;
@@ -167,9 +191,12 @@ class NotificationsView extends View {
         notifications,
         NOTIFICATIONS_PAGE_SIZE,
       );
-      return batchedNotifications.flatMap((batch) =>
-        groupNotificationsForBatch(batch),
-      );
+      return batchedNotifications
+        .flatMap((batch) => groupNotificationsForBatch(batch))
+        .filter(
+          (notificationGroup) =>
+            !shouldHideNotificationGroup(notificationGroup),
+        );
     }
 
     function notificationAvatarsTemplate({ notifications, maxAvatars = 5 }) {

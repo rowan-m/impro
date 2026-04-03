@@ -429,7 +429,7 @@ test.describe("Notifications view", () => {
     await expect(items.nth(2)).toContainText("followed you");
   });
 
-  test("should show 'Post unavailable' for deleted posts", async ({ page }) => {
+  test("should hide notifications for deleted posts", async ({ page }) => {
     // Don't add the post to mockServer.posts so it becomes unavailable
     const mockServer = new MockServer();
     mockServer.addNotifications([
@@ -446,13 +446,11 @@ test.describe("Notifications view", () => {
     await page.goto("/notifications");
 
     const view = page.locator("#notifications-view");
-    await expect(view.locator(".notification-item")).toHaveCount(1, {
-      timeout: 10000,
-    });
-    await expect(view).toContainText("liked your post");
-    await expect(view.locator(".unavailable-post")).toContainText(
-      "Post unavailable",
+    await expect(view.locator(".feed-end-message")).toContainText(
+      "No notifications yet!",
+      { timeout: 10000 },
     );
+    await expect(view.locator(".notification-item")).toHaveCount(0);
   });
 
   test("should display post preview with images", async ({ page }) => {
