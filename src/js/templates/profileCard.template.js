@@ -74,6 +74,9 @@ function profileDescriptionTemplate({
   `;
 }
 
+// Match the default banner color in social-app
+const LABELER_BANNER_FALLBACK_COLOR = "rgb(105, 0, 255)";
+
 export function profileCardTemplate({
   profile,
   richTextProfileDescription,
@@ -98,7 +101,12 @@ export function profileCardTemplate({
   const isBlockedBy = !!profile.viewer?.blockedBy;
   const canChat = profileChatStatus?.canChat || !!profileChatStatus?.convo;
   return html`<div class="profile-card">
-    <div class="profile-banner-container">
+    <div
+      class="profile-banner-container"
+      style="${!profile.banner && isLabeler
+        ? `background-color: ${LABELER_BANNER_FALLBACK_COLOR}`
+        : ""}"
+    >
       ${profile.banner
         ? html`
             <lightbox-image-group hide-alt-text="true">
