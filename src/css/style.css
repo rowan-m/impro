@@ -3609,6 +3609,10 @@ emoji-picker {
 .profile-handle {
   color: var(--text-color-muted);
   font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .profile-handle-row {
@@ -3625,6 +3629,7 @@ emoji-picker {
   padding: 3px 8px;
   border-radius: var(--tag-border-radius);
   display: inline-block;
+  min-width: fit-content;
 }
 
 .profile-blocked-badge {

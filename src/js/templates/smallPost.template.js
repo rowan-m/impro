@@ -103,8 +103,8 @@ export function smallPostTemplate({
             : ""}
           ${repostAuthor
             ? html`<div class="repost-label" data-testid="repost-label">
-                ${repostIconTemplate()} Reposted by
-                ${getDisplayName(repostAuthor)}
+                ${repostIconTemplate()}
+                ${"Reposted by" + getDisplayName(repostAuthor)}
               </div>`
             : ""}
           ${postHeaderTextTemplate({
