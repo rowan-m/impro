@@ -4579,6 +4579,10 @@ context-menu-item:last-child {
   margin-bottom: 0;
 }
 
+context-menu-item:last-child .context-menu-item {
+  margin-bottom: 0;
+}
+
 .context-menu-label {
   font-size: 13px;
   font-weight: 500;
