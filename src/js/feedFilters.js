@@ -120,6 +120,10 @@ function dedupeFeed(feed) {
   const rootUris = new Set();
   const dedupedFeedItems = [];
   for (const item of feed.feed) {
+    if (isRepost(item)) {
+      dedupedFeedItems.push(item);
+      continue;
+    }
     const rootUri = getRootUri(item);
     if (rootUris.has(rootUri)) {
       continue;
@@ -311,7 +315,8 @@ export function filterAlgorithmicFeed(feed, isAuthenticated) {
 }
 
 export function filterAuthorFeed(feed, isAuthenticated) {
-  let filteredFeed = filterEmptyPosts(feed);
+  let filteredFeed = dedupeFeed(feed);
+  filteredFeed = filterEmptyPosts(filteredFeed);
   filteredFeed = filterHiddenPosts(filteredFeed);
   filteredFeed = filterContentLabeledPosts(filteredFeed);
   filteredFeed = filterUnauthorizedPosts(filteredFeed, isAuthenticated);

@@ -150,6 +150,24 @@ t.describe("filterFollowingFeed", (it) => {
     assertEquals(result.feed.length, 2);
   });
 
+  it("should not deduplicate reposts with the same root URI", () => {
+    const rootUri = "at://did:plc:root/app.bsky.feed.post/123";
+    const items = [
+      createFeedItem({ post: { uri: rootUri } }),
+      createFeedItem({
+        post: { uri: rootUri },
+        reason: { $type: "app.bsky.feed.defs#reasonRepost" },
+      }),
+    ];
+    const feed = createFeed(items);
+    const currentUser = createCurrentUser();
+    const preferences = createPreferences();
+
+    const result = filterFollowingFeed(feed, currentUser, preferences, true);
+
+    assertEquals(result.feed.length, 2);
+  });
+
   it("should return unfiltered feed when no currentUser", () => {
     const items = [
       createFeedItem({
@@ -220,6 +238,38 @@ t.describe("filterAuthorFeed", (it) => {
       }),
       createFeedItem({
         post: { uri: "at://did:plc:test/app.bsky.feed.post/2" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterAuthorFeed(feed, true);
+
+    assertEquals(result.feed.length, 2);
+  });
+
+  it("should deduplicate posts by root URI", () => {
+    const rootUri = "at://did:plc:root/app.bsky.feed.post/123";
+    const items = [
+      createFeedItem({ post: { uri: rootUri } }),
+      createFeedItem({ post: { uri: rootUri } }),
+      createFeedItem({
+        post: { uri: "at://did:plc:other/app.bsky.feed.post/456" },
+      }),
+    ];
+    const feed = createFeed(items);
+
+    const result = filterAuthorFeed(feed, true);
+
+    assertEquals(result.feed.length, 2);
+  });
+
+  it("should not deduplicate reposts with the same root URI", () => {
+    const rootUri = "at://did:plc:root/app.bsky.feed.post/123";
+    const items = [
+      createFeedItem({ post: { uri: rootUri } }),
+      createFeedItem({
+        post: { uri: rootUri },
+        reason: { $type: "app.bsky.feed.defs#reasonRepost" },
       }),
     ];
     const feed = createFeed(items);
