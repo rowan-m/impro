@@ -394,6 +394,7 @@ class NotificationsView extends View {
         <div class="notification-reply-wrapper ${isUnread ? "unread" : ""}">
           ${smallPostTemplate({
             post,
+            ignoreContentWarning: true,
             isUserPost: currentUser?.did === post.author?.did,
             showReplyToLabel: !!replyToAuthor,
             replyToAuthor,
