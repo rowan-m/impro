@@ -419,6 +419,7 @@ class ProfileView extends View {
             currentUser,
             numNotifications,
             numChatNotifications,
+            showSidebarOverlay: false,
             activeNavItem: currentUser?.did === profile?.did ? "profile" : null,
             onClickActiveNavItem: () => {
               scrollAndReloadFeed();

@@ -552,11 +552,12 @@ export class Requests {
     if (reload) {
       cursor = "";
     }
-    const res = await this.api.getNotifications({ cursor, limit });
+    const labelers = this.requireLabelers();
+    const res = await this.api.getNotifications({ cursor, limit, labelers });
     // Get associated posts
     const postUris = getPostUrisFromNotifications(res.notifications);
     if (postUris.length > 0) {
-      const fetchedPosts = await this.api.getPosts(postUris);
+      const fetchedPosts = await this.api.getPosts(postUris, { labelers });
       this.dataStore.setPosts(fetchedPosts);
     }
     const previousCursor = this.dataStore.getNotificationCursor();
@@ -589,14 +590,16 @@ export class Requests {
     if (reload) {
       cursor = "";
     }
+    const labelers = this.requireLabelers();
     const res = await this.api.getNotifications({
       cursor,
       limit,
       reasons: MENTION_REASONS,
+      labelers,
     });
     const postUris = getPostUrisFromNotifications(res.notifications);
     if (postUris.length > 0) {
-      const fetchedPosts = await this.api.getPosts(postUris);
+      const fetchedPosts = await this.api.getPosts(postUris, { labelers });
       this.dataStore.setPosts(fetchedPosts);
     }
     const previousCursor = this.dataStore.getMentionNotificationCursor();

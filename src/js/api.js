@@ -526,7 +526,7 @@ export class Api {
     return res.data.count;
   }
 
-  async getNotifications({ cursor, limit = 31, reasons } = {}) {
+  async getNotifications({ cursor, limit = 31, reasons, labelers = [] } = {}) {
     const query = { cursor: cursor ?? "", limit };
     if (reasons?.length) {
       query.reasons = reasons;
@@ -534,6 +534,7 @@ export class Api {
     const res = await this.request("app.bsky.notification.listNotifications", {
       query,
       headers: {
+        "atproto-accept-labelers": labelers.join(","),
         "atproto-proxy": this.bskyAppViewServiceDid,
       },
     });
