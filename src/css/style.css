@@ -3609,8 +3609,8 @@ emoji-picker {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
-  margin-left: 1px;
-  margin-bottom: -1px;
+  /* margin-left: 1px; */
+  /* margin-bottom: -1px; */
   flex-shrink: 0;
   color: var(--highlight-color);
 }
@@ -3626,8 +3626,8 @@ emoji-picker {
 }
 
 .profile-list-item .verification-badge {
-  margin-left: 4px;
-  margin-bottom: 1px;
+  margin-left: 3px;
+  margin-bottom: 2px;
 }
 
 .profile-name .verification-badge svg {
