@@ -15,6 +15,7 @@ import {
   getDefinitionForLabel,
   isBadgeLabel,
   addFeedItemToFeed,
+  getDisplayName,
 } from "/js/dataHelpers.js";
 
 const t = new TestSuite("dataHelpers");
@@ -652,6 +653,86 @@ t.describe("addFeedItemToFeed", (it) => {
 
     assertEquals(result.length, 1);
     assertEquals(result[0].reason.$type, "app.bsky.feed.defs#reasonRepost");
+  });
+});
+
+t.describe("getDisplayName", (it) => {
+  it("should return displayName when present", () => {
+    const profile = { displayName: "Alice", handle: "alice.bsky.social" };
+    assertEquals(getDisplayName(profile), "Alice");
+  });
+
+  it("should trim whitespace from displayName", () => {
+    const profile = { displayName: "  Alice  ", handle: "alice.bsky.social" };
+    assertEquals(getDisplayName(profile), "Alice");
+  });
+
+  it("should strip check mark characters", () => {
+    const profile = {
+      displayName: "Alice \u2705\u2713\u2714\u2611",
+      handle: "alice.bsky.social",
+    };
+    assertEquals(getDisplayName(profile), "Alice");
+  });
+
+  it("should strip control characters", () => {
+    const profile = {
+      displayName: "Ali\u0000ce\u001F",
+      handle: "alice.bsky.social",
+    };
+    assertEquals(getDisplayName(profile), "Alice");
+  });
+
+  it("should strip bidirectional override characters", () => {
+    const profile = {
+      displayName: "Ali\u202Ace\u202E",
+      handle: "alice.bsky.social",
+    };
+    assertEquals(getDisplayName(profile), "Alice");
+  });
+
+  it("should collapse multiple spaces into one", () => {
+    const profile = {
+      displayName: "Alice   Bob",
+      handle: "alice.bsky.social",
+    };
+    assertEquals(getDisplayName(profile), "Alice Bob");
+  });
+
+  it("should collapse spaces with zero-width spaces", () => {
+    const profile = {
+      displayName: "Alice \u200B Bob",
+      handle: "alice.bsky.social",
+    };
+    assertEquals(getDisplayName(profile), "Alice Bob");
+  });
+
+  it("should handle all sanitizations together", () => {
+    const profile = {
+      displayName: "  \u2705Alice\u0000   Bob\u202E  ",
+      handle: "alice.bsky.social",
+    };
+    assertEquals(getDisplayName(profile), "Alice Bob");
+  });
+
+  it("should return 'Deleted Account' for missing.invalid handle", () => {
+    const profile = { handle: "missing.invalid" };
+    assertEquals(getDisplayName(profile), "Deleted Account");
+  });
+
+  it("should return 'Invalid Handle' for handle.invalid handle", () => {
+    const profile = { handle: "handle.invalid" };
+    assertEquals(getDisplayName(profile), "Invalid Handle");
+  });
+
+  it("should return handle when no displayName", () => {
+    const profile = { handle: "alice.bsky.social" };
+    assertEquals(getDisplayName(profile), "alice.bsky.social");
+  });
+
+  it("should prefer displayName over special handle fallbacks", () => {
+    const profile = { displayName: "Still Here", handle: "missing.invalid" };
+    assertEquals(getDisplayName(profile), "Still Here");
   });
 });
 
