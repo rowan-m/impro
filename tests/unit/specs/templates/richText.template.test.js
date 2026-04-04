@@ -40,6 +40,50 @@ t.describe("richTextTemplate", (it) => {
     assertEquals(link.textContent, "example.com");
   });
 
+  it("should truncate long link text", () => {
+    const url = "https://example.com/very/long/path/to/page";
+    const text = "See " + url;
+    const facets = [
+      {
+        index: { byteStart: 4, byteEnd: 4 + url.length },
+        features: [
+          {
+            $type: "app.bsky.richtext.facet#link",
+            uri: url,
+          },
+        ],
+      },
+    ];
+    const result = richTextTemplate({ text, facets });
+    const container = document.createElement("div");
+    render(result, container);
+    const link = container.querySelector("a");
+    assert(link !== null);
+    assertEquals(link.getAttribute("href"), url);
+    assertEquals(link.textContent, "example.com/very/long/pa...");
+  });
+
+  it("should not truncate short link text", () => {
+    const url = "https://example.com/short";
+    const text = "See " + url;
+    const facets = [
+      {
+        index: { byteStart: 4, byteEnd: 4 + url.length },
+        features: [
+          {
+            $type: "app.bsky.richtext.facet#link",
+            uri: url,
+          },
+        ],
+      },
+    ];
+    const result = richTextTemplate({ text, facets });
+    const container = document.createElement("div");
+    render(result, container);
+    const link = container.querySelector("a");
+    assertEquals(link.textContent, "example.com/short");
+  });
+
   it("should render text with mention facet", () => {
     const text = "Hello @user";
     const facets = [
