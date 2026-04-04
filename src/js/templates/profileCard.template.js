@@ -68,6 +68,7 @@ function profileDescriptionTemplate({
           ${richTextTemplate({
             text: richTextProfileDescription.text,
             facets: richTextProfileDescription.facets,
+            truncateUrls: true,
           })}
         </div>`
       : ""}
