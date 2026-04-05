@@ -1532,6 +1532,7 @@ body.scroll-locked header {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  align-items: center;
   gap: 1px 4px;
   overflow: hidden;
 }
