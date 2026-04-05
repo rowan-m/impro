@@ -9,6 +9,7 @@ import {
   createEmbedFromPost,
   embedViewRecordToPostView,
   replaceTopParent,
+  isAutomatedAccount,
   isLabelerProfile,
   getLabelNameAndDescription,
   getLabelerForLabel,
@@ -403,6 +404,42 @@ t.describe("replaceTopParent", (it) => {
 
     assertEquals(result.parent.parent.parent, newParent);
     assertEquals(result.parent.parent.post.uri, "grandparent-uri");
+  });
+});
+
+t.describe("isAutomatedAccount", (it) => {
+  it("should return false for profile without labels", () => {
+    const profile = { did: "did:plc:123", handle: "user.bsky.social" };
+    assertEquals(isAutomatedAccount(profile), false);
+  });
+
+  it("should return false for profile with empty labels", () => {
+    const profile = { did: "did:plc:123", labels: [] };
+    assertEquals(isAutomatedAccount(profile), false);
+  });
+
+  it("should return false for profile with non-bot labels", () => {
+    const profile = {
+      did: "did:plc:123",
+      labels: [{ val: "!no-unauthenticated" }],
+    };
+    assertEquals(isAutomatedAccount(profile), false);
+  });
+
+  it("should return true for profile with bot label", () => {
+    const profile = {
+      did: "did:plc:123",
+      labels: [{ val: "bot" }],
+    };
+    assertEquals(isAutomatedAccount(profile), true);
+  });
+
+  it("should return true when bot label is among other labels", () => {
+    const profile = {
+      did: "did:plc:123",
+      labels: [{ val: "!no-unauthenticated" }, { val: "bot" }],
+    };
+    assertEquals(isAutomatedAccount(profile), true);
   });
 });
 

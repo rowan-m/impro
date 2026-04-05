@@ -403,6 +403,11 @@ export function doHideAuthorOnUnauthenticated(author) {
   return authorLabels.some((label) => label.val === "!no-unauthenticated");
 }
 
+export function isAutomatedAccount(profile) {
+  const labels = profile?.labels || [];
+  return labels.some((label) => label.val === "bot");
+}
+
 export function isLabelerProfile(profile) {
   return profile.associated?.labeler;
 }

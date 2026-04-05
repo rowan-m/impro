@@ -2,6 +2,7 @@ import { html } from "/js/lib/lit-html.js";
 import { avatarTemplate } from "/js/templates/avatar.template.js";
 import { linkToProfile } from "/js/navigation.js";
 import { verificationBadgeTemplate } from "/js/templates/verificationBadge.template.js";
+import { automatedAccountBadgeTemplate } from "/js/templates/automatedAccountBadge.template.js";
 
 export function profileListItemTemplate({ actor }) {
   const displayName = actor.displayName || actor.handle;
@@ -16,7 +17,9 @@ export function profileListItemTemplate({ actor }) {
           class="profile-list-item-display-name"
           data-testid="profile-list-item-display-name"
         >
-          ${displayName}${verificationBadgeTemplate({ profile: actor })}
+          ${displayName}${verificationBadgeTemplate({
+            profile: actor,
+          })}${automatedAccountBadgeTemplate({ profile: actor })}
         </span>
       </a>
       <div

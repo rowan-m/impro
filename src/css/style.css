@@ -3654,6 +3654,39 @@ emoji-picker {
   height: 18px;
 }
 
+.automated-account-badge {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+  color: var(--text-color-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.automated-account-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.profile-info .automated-account-badge {
+  margin-left: 6px;
+  margin-bottom: 2px;
+}
+
+.profile-list-item .automated-account-badge {
+  margin-left: 3px;
+  margin-bottom: 2px;
+}
+
+.profile-name .automated-account-badge svg {
+  width: 18px;
+  height: 18px;
+}
+
 .profile-handle {
   color: var(--text-color-muted);
   font-size: 15px;
