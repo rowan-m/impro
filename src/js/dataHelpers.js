@@ -90,12 +90,16 @@ export function embedViewRecordToPostView(viewRecord) {
 }
 
 export function createEmbedFromPost(post) {
-  return {
+  const embed = {
     $type: "app.bsky.embed.record#viewRecord",
     author: { ...post.author },
     value: { ...post.record },
     uri: post.uri,
   };
+  if (post.embed) {
+    embed.embeds = [post.embed];
+  }
+  return embed;
 }
 
 export function createThreadViewPostFromPost(post) {

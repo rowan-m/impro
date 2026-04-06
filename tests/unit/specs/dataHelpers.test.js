@@ -231,6 +231,45 @@ t.describe("createEmbedFromPost", (it) => {
       uri: "minimal-uri",
     });
   });
+
+  it("should include embeds when post has an embed", () => {
+    const post = {
+      author: { did: "did:plc:123" },
+      record: { text: "Hello" },
+      uri: "test-uri",
+      embed: {
+        $type: "app.bsky.embed.images#view",
+        images: [{ thumb: "thumb.jpg" }],
+      },
+    };
+
+    const result = createEmbedFromPost(post);
+
+    assertEquals(result, {
+      $type: "app.bsky.embed.record#viewRecord",
+      author: { did: "did:plc:123" },
+      value: { text: "Hello" },
+      uri: "test-uri",
+      embeds: [
+        {
+          $type: "app.bsky.embed.images#view",
+          images: [{ thumb: "thumb.jpg" }],
+        },
+      ],
+    });
+  });
+
+  it("should not include embeds when post has no embed", () => {
+    const post = {
+      author: { did: "did:plc:456" },
+      record: { text: "No embed" },
+      uri: "no-embed-uri",
+    };
+
+    const result = createEmbedFromPost(post);
+
+    assert(!("embeds" in result));
+  });
 });
 
 t.describe("embedViewRecordToPostView", (it) => {
