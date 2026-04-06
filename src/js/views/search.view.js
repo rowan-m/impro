@@ -190,7 +190,7 @@ class SearchView extends View {
         }}
         ?disabled=${!postSearchHasMore}
       >
-        <div class=${classnames("loading-area", { loading: status.loading })}>
+        <div>
           ${postSearchResults.map(
             (post) =>
               html`<div class="feed-item" data-post-uri="${post.uri}">
@@ -243,11 +243,7 @@ class SearchView extends View {
         }}
         ?disabled=${!profileSearchHasMore}
       >
-        <div
-          class=${classnames("profile-list loading-area", {
-            loading: status.loading,
-          })}
-        >
+        <div class="profile-list">
           ${profileSearchResults.map((profile) =>
             profileResultTemplate({ profile }),
           )}
@@ -288,11 +284,7 @@ class SearchView extends View {
         }}
         ?disabled=${!feedSearchHasMore}
       >
-        <div
-          class=${classnames("feeds-list loading-area", {
-            loading: status.loading,
-          })}
-        >
+        <div class="feeds-list">
           ${feedSearchResults.map((feedGenerator) => {
             const isPinned = preferences.isFeedPinned(feedGenerator.uri);
             return html`

@@ -388,6 +388,9 @@ export class Requests {
       this.dataStore.clearProfileSearchResults();
       return;
     }
+    if (!cursor) {
+      this.dataStore.clearProfileSearchResults();
+    }
     const labelers = this.requireLabelers();
     const requestTime = Date.now();
     this.dataStore.setLatestProfileSearchRequestTime(requestTime);
@@ -414,6 +417,9 @@ export class Requests {
     if (!query) {
       this.dataStore.clearPostSearchResults();
       return;
+    }
+    if (!cursor) {
+      this.dataStore.clearPostSearchResults();
     }
     const labelers = this.requireLabelers();
     const requestTime = Date.now();
@@ -461,6 +467,9 @@ export class Requests {
     if (!query) {
       this.dataStore.clearFeedSearchResults();
       return;
+    }
+    if (!cursor) {
+      this.dataStore.clearFeedSearchResults();
     }
     const requestTime = Date.now();
     this.dataStore.setLatestFeedSearchRequestTime(requestTime);
