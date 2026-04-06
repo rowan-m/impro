@@ -2725,6 +2725,10 @@ lightbox-image-group.post-images.num-images-4 .post-image {
   align-items: center;
 }
 
+.notification-text .automated-account-badge {
+  margin-left: 4px;
+}
+
 .notification-more {
   width: 24px;
   height: 36px;

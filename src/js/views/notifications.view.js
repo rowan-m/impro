@@ -18,6 +18,7 @@ import {
   isUnavailablePost,
   parseUri,
 } from "/js/dataHelpers.js";
+import { automatedAccountBadgeTemplate } from "/js/templates/automatedAccountBadge.template.js";
 import { getTimestampFromRkey } from "/js/atproto.js";
 import { notificationsIconTemplate } from "/js/templates/icons/notificationsIcon.template.js";
 import { verifiedCheckIconTemplate } from "/js/templates/icons/verifiedCheckIcon.template.js";
@@ -234,7 +235,9 @@ class NotificationsView extends View {
         firstNotif.author.displayName || firstNotif.author.handle;
       const otherCount = notifications.length - 1;
       return html`<span
-        ><strong>${displayName}</strong>${otherCount > 0
+        ><strong>${displayName}</strong>${automatedAccountBadgeTemplate({
+          profile: firstNotif.author,
+        })}${otherCount > 0
           ? html`<span>
               and
               <strong
@@ -301,7 +304,7 @@ class NotificationsView extends View {
               New post from
               <a class="notification-profile-link" href="${profileLink}"
                 >${post.author.displayName ?? post.author.handle}</a
-              >
+              >${automatedAccountBadgeTemplate({ profile: post.author })}
               <span class="notification-time">· ${timeAgo}</span>
             </div>
             ${postPreviewTemplate({ post: post })}
@@ -552,7 +555,9 @@ class NotificationsView extends View {
               Your contact
               <a class="notification-profile-link" href="${profileLink}"
                 >${displayName}</a
-              >
+              >${automatedAccountBadgeTemplate({
+                profile: firstNotif.author,
+              })}
               is on Bluesky
               <span class="notification-time">· ${timeAgo}</span>
             </div>
