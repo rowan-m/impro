@@ -5432,6 +5432,7 @@ img[data-lightbox] {
 
 .muted-word-radio-group input[type="radio"] {
   accent-color: var(--highlight-color);
+  background-color: transparent;
   margin: 0;
 }
 
@@ -5455,6 +5456,7 @@ img[data-lightbox] {
 
 .muted-word-checkbox-row input[type="checkbox"] {
   accent-color: var(--highlight-color);
+  background-color: transparent;
   margin: 0;
 }
 
