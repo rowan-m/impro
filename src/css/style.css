@@ -1589,6 +1589,44 @@ body.scroll-locked header {
   padding-top: 11px;
   padding-bottom: 5px;
   font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.who-can-reply-body span {
+  display: block;
+}
+.who-can-reply-body span + span {
+  margin-top: 8px;
+}
+
+.who-can-reply-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-color-muted);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.who-can-reply-badge::before {
+  content: "·";
+  margin-right: 3px;
+}
+.who-can-reply-badge .users-icon {
+  width: 16px;
+  height: 16px;
+}
+.who-can-reply-badge:hover {
+  color: var(--text-color);
+}
+.who-can-reply-badge:hover :not(.users-icon) {
+  text-decoration: underline;
 }
 
 .post-text {

@@ -1344,4 +1344,137 @@ test.describe("Post thread view", () => {
       ).toBeVisible();
     });
   });
+
+  test.describe("threadgate badge", () => {
+    test("does not show badge when post has no threadgate", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      mockServer.addPosts([mainPost]);
+      await mockServer.setup(page);
+
+      await login(page);
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+      await expect(page.locator('[data-testid="large-post"]')).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(
+        page.locator('[data-testid="who-can-reply-badge"]'),
+      ).not.toBeAttached();
+    });
+
+    test("shows 'Replies disabled' and modal for empty allow", async ({
+      page,
+    }) => {
+      const post = createPost({
+        uri: postUri,
+        text: "Locked post",
+        authorHandle: "author1.bsky.social",
+        authorDisplayName: "Author One",
+        threadgate: {
+          uri: postUri.replace("feed.post", "feed.threadgate"),
+          cid: "bafyt1",
+          record: { allow: [] },
+          lists: [],
+        },
+      });
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([post]);
+      await mockServer.setup(page);
+
+      await login(page);
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+
+      const badge = page.locator('[data-testid="who-can-reply-badge"]');
+      await expect(badge).toHaveText("Replies disabled", { timeout: 10000 });
+
+      await badge.click();
+      const modal = page.locator('[data-testid="who-can-reply-modal"]');
+      await expect(modal).toContainText("Replies to this post are disabled.");
+
+      await modal.locator(".primary-button").click();
+      await expect(modal).not.toBeAttached();
+    });
+
+    test("shows 'Some people can reply' and lists rules in modal", async ({
+      page,
+    }) => {
+      const listUri = "at://did:plc:author1/app.bsky.graph.list/list1";
+      const post = createPost({
+        uri: postUri,
+        text: "Restricted post",
+        authorHandle: "author1.bsky.social",
+        authorDisplayName: "Author One",
+        threadgate: {
+          uri: postUri.replace("feed.post", "feed.threadgate"),
+          cid: "bafyt2",
+          record: {
+            allow: [
+              { $type: "app.bsky.feed.threadgate#mentionRule" },
+              { $type: "app.bsky.feed.threadgate#followingRule" },
+              { $type: "app.bsky.feed.threadgate#listRule", list: listUri },
+            ],
+          },
+          lists: [
+            {
+              uri: listUri,
+              cid: "bafyl1",
+              name: "Cool people",
+              purpose: "app.bsky.graph.defs#curatelist",
+            },
+          ],
+        },
+      });
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([post]);
+      await mockServer.setup(page);
+
+      await login(page);
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+
+      const badge = page.locator('[data-testid="who-can-reply-badge"]');
+      await expect(badge).toHaveText("Some people can reply", {
+        timeout: 10000,
+      });
+
+      await badge.click();
+      const modal = page.locator('[data-testid="who-can-reply-modal"]');
+      await expect(modal).toContainText("mentioned users");
+      await expect(modal).toContainText(
+        "users followed by @author1.bsky.social",
+      );
+      await expect(modal).toContainText("Cool people members");
+    });
+
+    test("shows quote-disabled note in modal when embeddingDisabled", async ({
+      page,
+    }) => {
+      const post = createPost({
+        uri: postUri,
+        text: "No quotes please",
+        authorHandle: "author1.bsky.social",
+        authorDisplayName: "Author One",
+        viewer: { embeddingDisabled: true },
+      });
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([post]);
+      await mockServer.setup(page);
+
+      await login(page);
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+
+      const badge = page.locator('[data-testid="who-can-reply-badge"]');
+      await expect(badge).toHaveText("Everybody can reply", { timeout: 10000 });
+
+      await badge.click();
+      const modal = page.locator('[data-testid="who-can-reply-modal"]');
+      await expect(modal).toContainText("Everybody can reply to this post.");
+      await expect(modal).toContainText(
+        "No one but the author can quote this post.",
+      );
+    });
+  });
 });
