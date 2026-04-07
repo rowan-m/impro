@@ -189,6 +189,18 @@ class PostComposer extends Component {
               this.close();
             }
           }}
+          @keydown=${(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              e.preventDefault();
+              if (
+                !this._isSending &&
+                !isAboveCharLimit &&
+                this._postText.length > 0
+              ) {
+                this.send();
+              }
+            }
+          }}
         >
           <div class="post-composer-content">
             <div class="post-composer-top-bar">
