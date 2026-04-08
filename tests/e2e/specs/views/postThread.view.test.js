@@ -1346,7 +1346,7 @@ test.describe("Post thread view", () => {
   });
 
   test.describe("threadgate badge", () => {
-    test("does not show badge when post has no threadgate", async ({
+    test("shows 'Everybody can reply' when post has no threadgate", async ({
       page,
     }) => {
       const mockServer = new MockServer();
@@ -1358,9 +1358,9 @@ test.describe("Post thread view", () => {
       await expect(page.locator('[data-testid="large-post"]')).toBeVisible({
         timeout: 10000,
       });
-      await expect(
-        page.locator('[data-testid="who-can-reply-badge"]'),
-      ).not.toBeAttached();
+      const badge = page.locator('[data-testid="who-can-reply-badge"]');
+      await expect(badge).toHaveText("Everybody can reply");
+      await expect(badge.locator(".globe-icon")).toBeVisible();
     });
 
     test("shows 'Replies disabled' and modal for empty allow", async ({

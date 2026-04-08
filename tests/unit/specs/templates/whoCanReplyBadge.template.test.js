@@ -12,13 +12,19 @@ function renderBadge(post) {
 }
 
 t.describe("whoCanReplyBadgeTemplate", (it) => {
-  it("renders nothing when post has no threadgate", () => {
-    assertEquals(renderBadge({}), null);
+  it("shows 'Everybody can reply' when post has no threadgate", () => {
+    const badge = renderBadge({});
+    assert(badge !== null);
+    assertEquals(badge.textContent.trim(), "Everybody can reply");
+    assert(badge.querySelector(".globe-icon") !== null);
   });
 
-  it("renders nothing when allow is undefined", () => {
+  it("shows 'Everybody can reply' when allow is undefined", () => {
     const post = { threadgate: { record: {} } };
-    assertEquals(renderBadge(post), null);
+    const badge = renderBadge(post);
+    assert(badge !== null);
+    assertEquals(badge.textContent.trim(), "Everybody can reply");
+    assert(badge.querySelector(".globe-icon") !== null);
   });
 
   it("shows 'Replies disabled' when allow is empty", () => {
@@ -73,8 +79,10 @@ t.describe("whoCanReplyBadgeTemplate", (it) => {
     assertEquals(badge.textContent.trim(), "Everybody can reply");
   });
 
-  it("renders nothing for everybody + embedding allowed", () => {
-    assertEquals(renderBadge({ viewer: { embeddingDisabled: false } }), null);
+  it("shows 'Everybody can reply' for everybody + embedding allowed", () => {
+    const badge = renderBadge({ viewer: { embeddingDisabled: false } });
+    assert(badge !== null);
+    assertEquals(badge.textContent.trim(), "Everybody can reply");
   });
 
   it("exposes a data-testid for e2e tests", () => {

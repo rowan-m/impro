@@ -1613,19 +1613,16 @@ body.scroll-locked header {
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
+  margin-left: 2px;
 }
-.who-can-reply-badge::before {
-  content: "·";
-  margin-right: 3px;
-}
-.who-can-reply-badge .users-icon {
+.who-can-reply-badge .icon {
   width: 16px;
   height: 16px;
 }
 .who-can-reply-badge:hover {
   color: var(--text-color);
 }
-.who-can-reply-badge:hover :not(.users-icon) {
+.who-can-reply-badge:hover :not(.icon) {
   text-decoration: underline;
 }
 
