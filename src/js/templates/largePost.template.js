@@ -136,6 +136,7 @@ export function largePostTemplate({
                     ${richTextTemplate({
                       text: postText,
                       facets: post.record.facets,
+                      truncateUrls: true,
                     })}
                   </div>`
                 : ""

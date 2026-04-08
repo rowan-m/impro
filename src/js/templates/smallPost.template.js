@@ -131,6 +131,7 @@ export function smallPostTemplate({
                     ${richTextTemplate({
                       text: postText,
                       facets: post.record.facets,
+                      truncateUrls: true,
                     })}
                   </div>`
                 : ""}

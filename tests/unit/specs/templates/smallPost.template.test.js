@@ -80,6 +80,36 @@ t.describe("smallPostTemplate", (it) => {
   });
 });
 
+t.describe("smallPostTemplate - rich text", (it) => {
+  it("should truncate long URLs in post text", () => {
+    const url = "https://example.com/very/long/path/to/some/page";
+    const text = "See " + url;
+    const postWithLongUrl = {
+      ...post,
+      record: {
+        ...post.record,
+        text,
+        facets: [
+          {
+            index: { byteStart: 4, byteEnd: 4 + url.length },
+            features: [{ $type: "app.bsky.richtext.facet#link", uri: url }],
+          },
+        ],
+      },
+    };
+    const result = smallPostTemplate({
+      post: postWithLongUrl,
+      postInteractionHandler,
+    });
+    const container = document.createElement("div");
+    render(result, container);
+    const link = container.querySelector("a[href='" + url + "']");
+    assert(link !== null);
+    assert(link.textContent.endsWith("..."));
+    assert(link.textContent.length < url.length);
+  });
+});
+
 t.describe("smallPostTemplate - pinned posts", (it) => {
   it("should show pinned label when isPinned is true", () => {
     const result = smallPostTemplate({

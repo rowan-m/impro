@@ -153,6 +153,7 @@ function quotedPostTemplate({ quotedPost, lazyLoadImages, isAuthenticated }) {
                   ${richTextTemplate({
                     text: postText,
                     facets: quotedPost.value.facets,
+                    truncateUrls: true,
                   })}
                 </div>`
               : ""}
