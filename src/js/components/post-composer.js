@@ -321,7 +321,6 @@ class PostComposer extends Component {
   }
 
   handleQuotedPostEmbedPreviewClose() {
-    this._rejectedLinkEmbeds.add(this._quotedPostUrl);
     this._quotedPostUrl = null;
     this.quotedPost = null;
     this.render();
