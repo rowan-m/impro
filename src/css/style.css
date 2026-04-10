@@ -1742,7 +1742,64 @@ body.scroll-locked header {
   background: light-dark(var(--lightest-gray), var(--gray));
   color: var(--text-color-muted);
   width: 100%;
-  /* margin-bottom: 10px; */
+}
+
+.small-post .missing-post-indicator.no-unauthenticated {
+  margin-top: 8px;
+}
+
+.large-post.no-unauthenticated-post {
+  display: block;
+}
+
+.no-unauthenticated-avatar {
+  width: var(--avatar-size-post);
+  height: var(--avatar-size-post);
+  border-radius: var(--avatar-border-radius);
+  background-color: var(--skeleton-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.no-unauthenticated-avatar .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-color-muted);
+}
+
+.no-unauthenticated-message {
+  font-style: italic;
+  color: var(--text-color-muted);
+  font-size: 14px;
+  padding-top: 4px;
+}
+
+.no-unauthenticated-message .icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.no-unauthenticated-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.no-unauthenticated-skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.no-unauthenticated-message-large {
+  font-size: 18px;
 }
 
 .small-post .label-badge {

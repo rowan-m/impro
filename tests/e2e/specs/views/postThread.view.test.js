@@ -474,6 +474,144 @@ test.describe("Post thread view", () => {
       // Reply composer should be hidden for logged-out users
       await expect(view.locator(".post-thread-reply-prompt")).not.toBeVisible();
     });
+
+    test("should show lock message for !no-unauthenticated anchor post", async ({
+      page,
+    }) => {
+      const restrictedPost = createPost({
+        uri: postUri,
+        text: "This post is restricted",
+        authorHandle: "restricted.bsky.social",
+        authorDisplayName: "Restricted Author",
+      });
+      restrictedPost.author.labels = [
+        { val: "!no-unauthenticated", src: restrictedPost.author.did },
+      ];
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([restrictedPost]);
+      await mockServer.setup(page);
+
+      await page.goto("/profile/restricted.bsky.social/post/abc123");
+
+      const view = page.locator("#post-detail-view");
+      await expect(view).toContainText(
+        "This author has chosen to make their posts visible only to people who are signed in.",
+        { timeout: 10000 },
+      );
+      await expect(view).not.toContainText("This post is restricted");
+    });
+
+    test("should show lock message for !no-unauthenticated parent post", async ({
+      page,
+    }) => {
+      const restrictedParent = createPost({
+        uri: "at://did:plc:restricted/app.bsky.feed.post/parent1",
+        text: "Restricted parent",
+        authorHandle: "restricted.bsky.social",
+        authorDisplayName: "Restricted Author",
+      });
+      restrictedParent.author.labels = [
+        { val: "!no-unauthenticated", src: restrictedParent.author.did },
+      ];
+
+      const childPost = createPost({
+        uri: postUri,
+        text: "This is a reply to restricted parent",
+        authorHandle: "author1.bsky.social",
+        authorDisplayName: "Author One",
+        reply: {
+          parent: { uri: restrictedParent.uri, cid: restrictedParent.cid },
+          root: { uri: restrictedParent.uri, cid: restrictedParent.cid },
+        },
+      });
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([childPost, restrictedParent]);
+      mockServer.setPostThread(postUri, {
+        $type: "app.bsky.feed.defs#threadViewPost",
+        post: childPost,
+        parent: {
+          $type: "app.bsky.feed.defs#threadViewPost",
+          post: restrictedParent,
+          parent: null,
+          replies: [],
+        },
+        replies: [],
+      });
+      await mockServer.setup(page);
+
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+
+      const view = page.locator("#post-detail-view");
+      await expect(view).toContainText(
+        "This author has chosen to make their posts visible only to people who are signed in.",
+        { timeout: 10000 },
+      );
+      await expect(view).not.toContainText("Restricted parent");
+      await expect(view).toContainText("This is a reply to restricted parent");
+    });
+
+    test("should hide !no-unauthenticated replies but show other replies when logged out", async ({
+      page,
+    }) => {
+      const postWithReplies = createPost({
+        uri: postUri,
+        text: "Post with restricted reply",
+        authorHandle: "author1.bsky.social",
+        authorDisplayName: "Author One",
+        replyCount: 2,
+      });
+
+      const normalReply = createPost({
+        uri: "at://did:plc:replier1/app.bsky.feed.post/reply1",
+        text: "Normal visible reply",
+        authorHandle: "replier1.bsky.social",
+        authorDisplayName: "Replier One",
+      });
+
+      const restrictedReply = createPost({
+        uri: "at://did:plc:restricted/app.bsky.feed.post/reply2",
+        text: "This reply should be hidden",
+        authorHandle: "restricted.bsky.social",
+        authorDisplayName: "Restricted Author",
+      });
+      restrictedReply.author.labels = [
+        { val: "!no-unauthenticated", src: restrictedReply.author.did },
+      ];
+
+      const mockServer = new MockServer();
+      mockServer.addPosts([postWithReplies, normalReply, restrictedReply]);
+      mockServer.setPostThread(postUri, {
+        $type: "app.bsky.feed.defs#threadViewPost",
+        post: postWithReplies,
+        parent: null,
+        replies: [
+          {
+            $type: "app.bsky.feed.defs#threadViewPost",
+            post: normalReply,
+            replies: [],
+          },
+          {
+            $type: "app.bsky.feed.defs#threadViewPost",
+            post: restrictedReply,
+            replies: [],
+          },
+        ],
+      });
+      await mockServer.setup(page);
+
+      await page.goto("/profile/author1.bsky.social/post/abc123");
+
+      const view = page.locator("#post-detail-view");
+      await expect(view.locator('[data-testid="large-post"]')).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(view).toContainText("Normal visible reply", {
+        timeout: 10000,
+      });
+      await expect(view).not.toContainText("This reply should be hidden");
+    });
   });
 
   test.describe("Hidden replies section", () => {
