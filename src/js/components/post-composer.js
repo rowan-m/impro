@@ -10,6 +10,8 @@ import { ScrollLock } from "/js/scrollLock.js";
 import { imageIconTemplate } from "/js/templates/icons/imageIcon.template.js";
 import { showToast } from "/js/toasts.js";
 import { IN_APP_LINK_DOMAINS } from "/js/config.js";
+import { quotedPostTemplate } from "/js/templates/postEmbed.template.js";
+import { createEmbedFromPost } from "/js/dataHelpers.js";
 import "/js/components/rich-text-input.js";
 import "/js/components/image-alt-text-dialog.js";
 
@@ -58,33 +60,6 @@ function replyToTemplate({ post }) {
         </div>
       </div>
       <hr style="margin-top: 18px;" />
-    </div>
-  `;
-}
-
-function quotedPostTemplate({ post }) {
-  return html`
-    <div class="quoted-post-link">
-      <div class="quoted-post post-content">
-        <div class="quoted-post-header">
-          ${avatarTemplate({ author: post.author, clickAction: "none" })}
-          ${postHeaderTextTemplate({
-            author: post.author,
-            timestamp: post.indexedAt,
-            enableProfileLink: false,
-          })}
-        </div>
-        <div class="quoted-post-body">
-          ${post.record.text
-            ? html`<div class="post-text">
-                ${richTextTemplate({
-                  text: post.record.text.trimEnd(),
-                  facets: post.record.facets,
-                })}
-              </div>`
-            : ""}
-        </div>
-      </div>
     </div>
   `;
 }
@@ -268,7 +243,12 @@ class PostComposer extends Component {
                     >
                       <span>×</span>
                     </button>
-                    ${quotedPostTemplate({ post: this.quotedPost })}
+                    <div inert>
+                      ${quotedPostTemplate({
+                        quotedPost: createEmbedFromPost(this.quotedPost),
+                        isAuthenticated: true,
+                      })}
+                    </div>
                   </div>`
                 : ""}
               <div class="post-composer-bottom-bar">
