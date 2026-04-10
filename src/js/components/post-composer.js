@@ -214,6 +214,9 @@ class PostComposer extends Component {
                     @input=${(e) => {
                       this.handleInput(e);
                     }}
+                    @paste=${(e) => {
+                      this.handlePaste(e);
+                    }}
                     placeholder="${promptText}"
                   ></rich-text-input>
                 </div>
@@ -447,6 +450,25 @@ class PostComposer extends Component {
       }
     }
     this.render();
+  }
+
+  handlePaste() {
+    // Unlike external links, add quote posts immediately if a link is pasted
+    // Wait a tick so handleInput runs first
+    requestAnimationFrame(() => {
+      if (this.quotedPost || this._quotedPostUrl) return;
+      for (const facet of this._unresolvedFacets) {
+        const feature = facet.features[0];
+        if (feature.$type === "app.bsky.richtext.facet#link") {
+          const url = feature.uri;
+          if (isQuotePostLink(url) && !this._rejectedLinkEmbeds.has(url)) {
+            this._quotedPostUrl = url;
+            this.loadQuotedPostFromLink();
+            break;
+          }
+        }
+      }
+    });
   }
 
   async loadExternalLinkEmbedPreview() {
