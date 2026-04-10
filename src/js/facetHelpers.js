@@ -66,7 +66,7 @@ function getHashtags(text) {
   });
 }
 
-const mentionRegex = /@[a-zA-Z0-9._-]+/gm;
+const mentionRegex = /(?<=^|\s)@[a-zA-Z0-9._-]+/gm;
 
 function getUnresolvedMentions(text) {
   const matches = text.matchAll(mentionRegex) || [];

@@ -114,6 +114,16 @@ t.describe("getUnresolvedFacetsFromText", (it) => {
     assertEquals(facets[0].index.byteEnd, 7);
   });
 
+  it("should not parse email addresses as mentions", () => {
+    const text = "Contact me at user@example.com for info";
+    const facets = getUnresolvedFacetsFromText(text);
+
+    const mentions = facets.filter(
+      (f) => f.features[0].$type === "app.bsky.richtext.facet#mention",
+    );
+    assertEquals(mentions.length, 0);
+  });
+
   it("should handle multibyte characters in byte indices", () => {
     const text = "Hello 世界 @alice.bsky.social";
     const facets = getUnresolvedFacetsFromText(text);
