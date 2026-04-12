@@ -95,6 +95,13 @@ export function createEmbedFromPost(post) {
     author: { ...post.author },
     value: { ...post.record },
     uri: post.uri,
+    cid: post.cid,
+    indexedAt: post.indexedAt,
+    labels: post.labels,
+    likeCount: post.likeCount,
+    replyCount: post.replyCount,
+    repostCount: post.repostCount,
+    quoteCount: post.quoteCount,
   };
   if (post.embed) {
     embed.embeds = [post.embed];

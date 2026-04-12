@@ -189,6 +189,13 @@ t.describe("createEmbedFromPost", (it) => {
       author: { did: "did:plc:123", displayName: "Test User" },
       record: { text: "Hello world", createdAt: "2024-01-01" },
       uri: "at://did:plc:123/app.bsky.feed.post/abc123",
+      cid: "cid123",
+      indexedAt: "2024-01-01T00:00:00Z",
+      labels: [{ val: "test" }],
+      likeCount: 5,
+      replyCount: 2,
+      repostCount: 1,
+      quoteCount: 3,
     };
 
     const result = createEmbedFromPost(post);
@@ -198,6 +205,13 @@ t.describe("createEmbedFromPost", (it) => {
       author: { did: "did:plc:123", displayName: "Test User" },
       value: { text: "Hello world", createdAt: "2024-01-01" },
       uri: "at://did:plc:123/app.bsky.feed.post/abc123",
+      cid: "cid123",
+      indexedAt: "2024-01-01T00:00:00Z",
+      labels: [{ val: "test" }],
+      likeCount: 5,
+      replyCount: 2,
+      repostCount: 1,
+      quoteCount: 3,
     });
   });
 
@@ -230,6 +244,13 @@ t.describe("createEmbedFromPost", (it) => {
       author: {},
       value: {},
       uri: "minimal-uri",
+      cid: undefined,
+      indexedAt: undefined,
+      labels: undefined,
+      likeCount: undefined,
+      replyCount: undefined,
+      repostCount: undefined,
+      quoteCount: undefined,
     });
   });
 
@@ -238,6 +259,13 @@ t.describe("createEmbedFromPost", (it) => {
       author: { did: "did:plc:123" },
       record: { text: "Hello" },
       uri: "test-uri",
+      cid: "cid456",
+      indexedAt: "2024-02-01T00:00:00Z",
+      labels: [],
+      likeCount: 0,
+      replyCount: 0,
+      repostCount: 0,
+      quoteCount: 0,
       embed: {
         $type: "app.bsky.embed.images#view",
         images: [{ thumb: "thumb.jpg" }],
@@ -251,6 +279,13 @@ t.describe("createEmbedFromPost", (it) => {
       author: { did: "did:plc:123" },
       value: { text: "Hello" },
       uri: "test-uri",
+      cid: "cid456",
+      indexedAt: "2024-02-01T00:00:00Z",
+      labels: [],
+      likeCount: 0,
+      replyCount: 0,
+      repostCount: 0,
+      quoteCount: 0,
       embeds: [
         {
           $type: "app.bsky.embed.images#view",
