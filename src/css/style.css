@@ -1616,8 +1616,8 @@ body.scroll-locked header {
   margin-left: 2px;
 }
 .who-can-reply-badge .icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 .who-can-reply-badge:hover {
   color: var(--text-color);
