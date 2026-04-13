@@ -17,6 +17,7 @@ import { AUTHOR_FEED_PAGE_SIZE, BSKY_LABELER_DID } from "/js/config.js";
 import { showToast } from "/js/toasts.js";
 import { tabBarTemplate } from "/js/templates/tabBar.template.js";
 import { feedGeneratorListItemTemplate } from "/js/templates/feedGeneratorListItem.template.js";
+import "/js/components/edit-profile-dialog.js";
 
 class ProfileView extends View {
   async render({
@@ -90,6 +91,19 @@ class ProfileView extends View {
         renderFunc: () => renderPage(),
       },
     );
+
+    async function handleEditProfile(profile) {
+      const dialog = document.createElement("edit-profile-dialog");
+      dialog.addEventListener("profile-save", (event) =>
+        handleSaveProfile(profile, event.detail.profileUpdates),
+      );
+      dialog.addEventListener("edit-profile-closed", () => {
+        dialog.remove();
+      });
+      root.querySelector("main").appendChild(dialog);
+      dialog.setProfile(profile);
+      dialog.open();
+    }
 
     const tabScrollState = new Map();
 
@@ -315,6 +329,7 @@ class ProfileView extends View {
                 ),
               onClickReport: (profile) =>
                 profileInteractionHandler.handleReport(profile),
+              onClickEditProfile: () => handleEditProfile(profile),
             })}
             ${isBlocking || isBlockedBy
               ? html`<div class="feed">
@@ -396,6 +411,20 @@ class ProfileView extends View {
 
     function profileSkeletonTemplate() {
       return html`<div class="profile-container"></div>`;
+    }
+
+    async function handleSaveProfile(profile, profileUpdates) {
+      const dialog = root.querySelector("edit-profile-dialog");
+      try {
+        await dataLayer.mutations.updateProfile(profile, profileUpdates);
+        showToast("Profile updated");
+        dialog.close();
+        renderPage();
+        dataLayer.requests.loadProfile(profileDid);
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+        dialog?.setError("Failed to save profile. Please try again.");
+      }
     }
 
     function renderPage() {

@@ -114,6 +114,18 @@ export function getIndexFromByteIndex(text, byteIndex) {
   return decoder.decode(slicedBytes).length;
 }
 
+const graphemeSegmenter =
+  typeof Intl !== "undefined" && Intl.Segmenter
+    ? new Intl.Segmenter("en", { granularity: "grapheme" })
+    : null;
+
+export function graphemeCount(str) {
+  if (graphemeSegmenter) {
+    return [...graphemeSegmenter.segment(str)].length;
+  }
+  return [...str].length;
+}
+
 export function formatLargeNumber(number) {
   if (number >= 1000) {
     const stringified = String(number / 1000);

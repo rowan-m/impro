@@ -920,6 +920,34 @@ export class Api {
     return res.data.blob;
   }
 
+  async getProfileRecord() {
+    const res = await this.request("com.atproto.repo.getRecord", {
+      query: {
+        repo: this.session.did,
+        collection: "app.bsky.actor.profile",
+        rkey: "self",
+      },
+    });
+    return res.data;
+  }
+
+  async putProfileRecord(record, swapRecord) {
+    const res = await this.request("com.atproto.repo.putRecord", {
+      method: "POST",
+      body: {
+        repo: this.session.did,
+        collection: "app.bsky.actor.profile",
+        rkey: "self",
+        record: {
+          $type: "app.bsky.actor.profile",
+          ...record,
+        },
+        swapRecord: swapRecord ?? null,
+      },
+    });
+    return res.data;
+  }
+
   async createModerationReport({ reasonType, reason, subject, labelerDid }) {
     const body = {
       reasonType,

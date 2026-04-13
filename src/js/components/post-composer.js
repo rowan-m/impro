@@ -3,7 +3,12 @@ import { Component } from "/js/components/component.js";
 import { avatarTemplate } from "/js/templates/avatar.template.js";
 import { postHeaderTextTemplate } from "/js/templates/postHeaderText.template.js";
 import { richTextTemplate } from "/js/templates/richText.template.js";
-import { classnames, enableDragToDismiss, sanitizeUri } from "/js/utils.js";
+import {
+  classnames,
+  enableDragToDismiss,
+  graphemeCount,
+  sanitizeUri,
+} from "/js/utils.js";
 import { externalLinkTemplate } from "/js/templates/externalLink.template.js";
 import { confirm } from "/js/modals.js";
 import { ScrollLock } from "/js/scrollLock.js";
@@ -142,7 +147,7 @@ class PostComposer extends Component {
 
   render() {
     const promptText = this.replyTo ? "Write your reply" : "What's up?";
-    const currentCharCount = this._postText.length;
+    const currentCharCount = graphemeCount(this._postText);
     const charCountPercentage = Math.min(
       Math.round((currentCharCount / 300) * 100),
       100,

@@ -564,6 +564,92 @@ export class Mutations {
     }
   }
 
+  async updateProfile(
+    profile,
+    {
+      displayName,
+      description,
+      avatarBlob,
+      bannerBlob,
+      removeAvatar,
+      removeBanner,
+    },
+  ) {
+    const patchId = this.patchStore.addProfilePatch(profile.did, {
+      type: "updateProfile",
+      displayName,
+      description,
+      avatar: removeAvatar ? null : undefined,
+      banner: removeBanner ? null : undefined,
+    });
+    try {
+      const [avatarRef, bannerRef] = await Promise.all([
+        avatarBlob ? this.api.uploadBlob(avatarBlob) : null,
+        bannerBlob ? this.api.uploadBlob(bannerBlob) : null,
+      ]);
+
+      let existingRecord = {};
+      let swapCid = null;
+      try {
+        const recordData = await this.api.getProfileRecord();
+        existingRecord = recordData.value || {};
+        swapCid = recordData.cid;
+      } catch (error) {
+        if (error.status === 400) {
+          // No existing record is ok
+        } else {
+          throw error;
+        }
+      }
+
+      const updatedRecord = { ...existingRecord };
+      if (displayName !== undefined) {
+        updatedRecord.displayName = displayName;
+      }
+      if (description !== undefined) {
+        updatedRecord.description = description;
+      }
+      if (avatarRef) {
+        updatedRecord.avatar = avatarRef;
+      } else if (removeAvatar) {
+        delete updatedRecord.avatar;
+      }
+      if (bannerRef) {
+        updatedRecord.banner = bannerRef;
+      } else if (removeBanner) {
+        delete updatedRecord.banner;
+      }
+
+      await this.api.putProfileRecord(updatedRecord, swapCid);
+
+      const updatedProfile = {
+        ...profile,
+        displayName: displayName || "",
+        description: description || "",
+      };
+      if (removeAvatar) {
+        updatedProfile.avatar = undefined;
+      }
+      if (removeBanner) {
+        updatedProfile.banner = undefined;
+      }
+      this.dataStore.setProfile(profile.did, updatedProfile);
+
+      const currentUser = this.dataStore.getCurrentUser();
+      if (currentUser && currentUser.did === profile.did) {
+        this.dataStore.setCurrentUser({
+          ...currentUser,
+          ...updatedProfile,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      this.patchStore.removeProfilePatch(profile.did, patchId);
+    }
+  }
+
   async createPost({
     postText,
     facets,

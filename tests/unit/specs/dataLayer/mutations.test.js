@@ -779,4 +779,237 @@ t.describe("removeMutedWord", (it) => {
   });
 });
 
+t.describe("updateProfile", (it) => {
+  const testProfile = {
+    did: "did:plc:test123",
+    displayName: "Old Name",
+    description: "Old bio",
+    avatar: "https://example.com/avatar.jpg",
+    banner: "https://example.com/banner.jpg",
+    viewer: {},
+  };
+
+  function createMutationsWithMockApi(mockApi) {
+    const dataStore = new DataStore();
+    const patchStore = new PatchStore();
+    const mockPreferencesProvider = {
+      requirePreferences: () => Preferences.createLoggedOutPreferences(),
+    };
+    dataStore.setProfile(testProfile.did, testProfile);
+    dataStore.setCurrentUser(testProfile);
+    return {
+      mutations: new Mutations(
+        mockApi,
+        dataStore,
+        patchStore,
+        mockPreferencesProvider,
+      ),
+      dataStore,
+      patchStore,
+    };
+  }
+
+  it("should call getProfileRecord and putProfileRecord", async () => {
+    let getRecordCalled = false;
+    let putRecordCalled = false;
+    let putRecordArgs = null;
+    const mockApi = {
+      getProfileRecord: async () => {
+        getRecordCalled = true;
+        return {
+          value: { displayName: "Old Name", description: "Old bio" },
+          cid: "cid123",
+        };
+      },
+      putProfileRecord: async (record, swapRecord) => {
+        putRecordCalled = true;
+        putRecordArgs = { record, swapRecord };
+        return {};
+      },
+      uploadBlob: async () => ({
+        ref: { $link: "blob-link" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+    };
+
+    const { mutations } = createMutationsWithMockApi(mockApi);
+    await mutations.updateProfile(testProfile, {
+      displayName: "New Name",
+      description: "New bio",
+    });
+
+    assertEquals(getRecordCalled, true);
+    assertEquals(putRecordCalled, true);
+    assertEquals(putRecordArgs.record.displayName, "New Name");
+    assertEquals(putRecordArgs.record.description, "New bio");
+    assertEquals(putRecordArgs.swapRecord, "cid123");
+  });
+
+  it("should upload avatar blob when provided", async () => {
+    let uploadBlobCalled = false;
+    const mockApi = {
+      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
+      putProfileRecord: async () => ({}),
+      uploadBlob: async (blob) => {
+        uploadBlobCalled = true;
+        return {
+          ref: { $link: "avatar-blob" },
+          mimeType: "image/jpeg",
+          size: 100,
+        };
+      },
+    };
+
+    const { mutations } = createMutationsWithMockApi(mockApi);
+    const fakeBlob = new Blob(["test"], { type: "image/jpeg" });
+    await mutations.updateProfile(testProfile, {
+      displayName: "Test",
+      description: "Test",
+      avatarBlob: fakeBlob,
+    });
+
+    assertEquals(uploadBlobCalled, true);
+  });
+
+  it("should upload banner blob when provided", async () => {
+    let uploadBlobCallCount = 0;
+    const mockApi = {
+      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => {
+        uploadBlobCallCount++;
+        return {
+          ref: { $link: "blob-link" },
+          mimeType: "image/jpeg",
+          size: 100,
+        };
+      },
+    };
+
+    const { mutations } = createMutationsWithMockApi(mockApi);
+    const fakeBlob = new Blob(["test"], { type: "image/jpeg" });
+    await mutations.updateProfile(testProfile, {
+      displayName: "Test",
+      description: "Test",
+      bannerBlob: fakeBlob,
+    });
+
+    assertEquals(uploadBlobCallCount, 1);
+  });
+
+  it("should update dataStore on success", async () => {
+    const mockApi = {
+      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => ({
+        ref: { $link: "blob" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+    };
+
+    const { mutations, dataStore } = createMutationsWithMockApi(mockApi);
+    await mutations.updateProfile(testProfile, {
+      displayName: "Updated Name",
+      description: "Updated bio",
+    });
+
+    const updatedProfile = dataStore.getProfile(testProfile.did);
+    assertEquals(updatedProfile.displayName, "Updated Name");
+    assertEquals(updatedProfile.description, "Updated bio");
+  });
+
+  it("should apply optimistic patch during update", () => {
+    const mockApi = {
+      getProfileRecord: async () => new Promise(() => {}), // Never resolves
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => ({
+        ref: { $link: "blob" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+    };
+
+    const { mutations, patchStore } = createMutationsWithMockApi(mockApi);
+    mutations.updateProfile(testProfile, {
+      displayName: "Optimistic Name",
+      description: "Optimistic bio",
+    });
+
+    const patchedProfile = patchStore.applyProfilePatches(testProfile);
+    assertEquals(patchedProfile.displayName, "Optimistic Name");
+    assertEquals(patchedProfile.description, "Optimistic bio");
+  });
+
+  it("should clear optimistic patch after completion", async () => {
+    const mockApi = {
+      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => ({
+        ref: { $link: "blob" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+    };
+
+    const { mutations, patchStore, dataStore } =
+      createMutationsWithMockApi(mockApi);
+    await mutations.updateProfile(testProfile, {
+      displayName: "New Name",
+      description: "New bio",
+    });
+
+    const updatedProfile = dataStore.getProfile(testProfile.did);
+    const patchedProfile = patchStore.applyProfilePatches(updatedProfile);
+    assertEquals(patchedProfile.displayName, updatedProfile.displayName);
+  });
+
+  it("should rethrow non-400 errors from getProfileRecord", async () => {
+    const mockApi = {
+      getProfileRecord: async () => {
+        throw { status: 500, message: "Internal Server Error" };
+      },
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => ({
+        ref: { $link: "blob" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+    };
+
+    const { mutations } = createMutationsWithMockApi(mockApi);
+    try {
+      await mutations.updateProfile(testProfile, {
+        displayName: "New Name",
+        description: "New bio",
+      });
+      throw new Error("Expected updateProfile to throw");
+    } catch (error) {
+      assertEquals(error.status, 500);
+    }
+  });
+
+  it("should update currentUser when editing own profile", async () => {
+    const mockApi = {
+      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => ({
+        ref: { $link: "blob" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+    };
+
+    const { mutations, dataStore } = createMutationsWithMockApi(mockApi);
+    await mutations.updateProfile(testProfile, {
+      displayName: "Updated User",
+      description: "Updated bio",
+    });
+
+    const currentUser = dataStore.getCurrentUser();
+    assertEquals(currentUser.displayName, "Updated User");
+  });
+});
+
 await t.run();
