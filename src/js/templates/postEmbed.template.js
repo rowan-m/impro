@@ -178,25 +178,35 @@ export function quotedPostTemplate({
   </a>`;
 }
 
+function imageContainerTemplate({ image, lazyLoad }) {
+  return html`<div class="post-image-container">
+    <img
+      class="post-image"
+      src="${image.thumb}"
+      alt=${image.alt}
+      height=${image.aspectRatio?.height ?? ""}
+      width=${image.aspectRatio?.width ?? ""}
+      loading=${lazyLoad ? "lazy" : "eager"}
+    />
+    ${image.alt ? html` <div class="alt-indicator">ALT</div> ` : ""}
+  </div>`;
+}
+
 function imagesTemplate({ images, lazyLoad = false }) {
   return html`<lightbox-image-group
     class="post-images num-images-${images.length}"
     data-testid="post-images"
   >
-    ${images.map(
-      (image) =>
-        html`<div class="post-image-container">
-          <img
-            class="post-image"
-            src="${image.thumb}"
-            alt=${image.alt}
-            height=${image.aspectRatio?.height ?? ""}
-            width=${image.aspectRatio?.width ?? ""}
-            loading=${lazyLoad ? "lazy" : "eager"}
-          />
-          ${image.alt ? html` <div class="alt-indicator">ALT</div> ` : ""}
-        </div> `,
-    )}
+    ${images.length === 3
+      ? // When there are three images, wrap the right two in a div
+        html`${imageContainerTemplate({ image: images[0], lazyLoad })}
+          <div class="right-column">
+            ${imageContainerTemplate({ image: images[1], lazyLoad })}
+            ${imageContainerTemplate({ image: images[2], lazyLoad })}
+          </div>`
+      : images.map((image) =>
+          imageContainerTemplate({ image: image, lazyLoad }),
+        )}
   </lightbox-image-group>`;
 }
 

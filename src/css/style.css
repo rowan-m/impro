@@ -2583,34 +2583,45 @@ lightbox-image-group.post-images.num-images-2 .post-image {
 }
 
 lightbox-image-group.post-images.num-images-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  display: flex;
+  flex-direction: row;
   gap: 4px;
   width: 100%;
-  container-type: inline-size;
 }
 
-/* first image container spans both rows */
 lightbox-image-group.post-images.num-images-3
   .post-image-container:first-child {
-  grid-row: 1 / 3;
+  flex: 1;
+  aspect-ratio: 1/1;
 }
 
-lightbox-image-group.post-images.num-images-3 .post-image {
+lightbox-image-group.post-images.num-images-3
+  .post-image-container:first-child
+  .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* second and third images have max height constraint */
+lightbox-image-group.post-images.num-images-3 .right-column {
+  flex: 1;
+  aspect-ratio: 1/1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 lightbox-image-group.post-images.num-images-3
-  .post-image-container:nth-child(2)
-  .post-image,
-lightbox-image-group.post-images.num-images-3
-  .post-image-container:nth-child(3)
-  .post-image {
-  max-height: 50cqw;
+  .right-column
+  .post-image-container {
+  flex: 1;
+  min-height: 0;
+}
+
+lightbox-image-group.post-images.num-images-3 .right-column .post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 lightbox-image-group.post-images.num-images-4 {
@@ -2624,7 +2635,7 @@ lightbox-image-group.post-images.num-images-4 {
 lightbox-image-group.post-images.num-images-4 .post-image {
   width: 100%;
   height: 100%;
-  aspect-ratio: 1/1;
+  aspect-ratio: 1.5/1;
   object-fit: cover;
 }
 
