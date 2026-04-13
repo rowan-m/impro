@@ -137,6 +137,62 @@ t.describe("getQuotedPost", (it) => {
     const post = { uri: "test" };
     assertEquals(getQuotedPost(post), null);
   });
+
+  it("should use embeds array when available", () => {
+    const post = {
+      embeds: [
+        {
+          $type: "app.bsky.embed.record#view",
+          record: { uri: "quoted-post-uri", author: { displayName: "Test" } },
+        },
+      ],
+    };
+    assertEquals(getQuotedPost(post), post.embeds[0].record);
+  });
+
+  it("should use embeds array for recordWithMedia", () => {
+    const post = {
+      embeds: [
+        {
+          $type: "app.bsky.embed.recordWithMedia#view",
+          record: {
+            record: {
+              uri: "quoted-post-uri",
+              author: { displayName: "Test" },
+            },
+          },
+        },
+      ],
+    };
+    assertEquals(getQuotedPost(post), post.embeds[0].record.record);
+  });
+
+  it("should prefer embeds array over embed property", () => {
+    const post = {
+      embeds: [
+        {
+          $type: "app.bsky.embed.record#view",
+          record: { uri: "from-embeds-array" },
+        },
+      ],
+      embed: {
+        $type: "app.bsky.embed.record#view",
+        record: { uri: "from-embed-prop" },
+      },
+    };
+    assertEquals(getQuotedPost(post), post.embeds[0].record);
+  });
+
+  it("should fall back to embed when embeds is empty", () => {
+    const post = {
+      embeds: [],
+      embed: {
+        $type: "app.bsky.embed.record#view",
+        record: { uri: "from-embed-prop" },
+      },
+    };
+    assertEquals(getQuotedPost(post), null);
+  });
 });
 
 t.describe("getBlockedQuote", (it) => {

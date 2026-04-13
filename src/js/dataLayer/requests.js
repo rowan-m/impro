@@ -2,6 +2,7 @@ import { Normalizer } from "./normalizer.js";
 import {
   flattenParents,
   replaceTopParent,
+  getQuotedPost,
   getBlockedQuote,
   isBlockingUser,
   createUnavailablePost,
@@ -43,7 +44,16 @@ function getBlockedPostUris(posts) {
     .map((post) => getBlockedQuote(post))
     .filter(Boolean)
     .filter((blockedPost) => !isBlockingUser(blockedPost));
-  return unique([...blockedPosts, ...blockedQuotes], {
+  // Blocked nested quotes
+  // Note - this won't load blocked quotes of blocked quotes (edge case)
+  const blockedNestedQuotes = posts
+    .map((post) => getQuotedPost(post))
+    .filter(Boolean)
+    .map((quotedPost) => getBlockedQuote(quotedPost))
+    .filter(Boolean)
+    .filter((blockedPost) => !isBlockingUser(blockedPost));
+
+  return unique([...blockedPosts, ...blockedQuotes, ...blockedNestedQuotes], {
     by: "uri",
   }).map((blockedPost) => blockedPost.uri);
 }

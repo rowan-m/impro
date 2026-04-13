@@ -29,7 +29,7 @@ export function getIsLiked(post) {
   return !!post.viewer?.like;
 }
 export function getQuotedPost(post) {
-  const embed = post.embed;
+  const embed = post.embeds ? post.embeds[0] : post.embed;
   if (!embed) {
     return null;
   }
