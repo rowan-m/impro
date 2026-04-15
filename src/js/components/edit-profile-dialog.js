@@ -462,7 +462,7 @@ class EditProfileDialog extends Component {
   }
 
   async _confirmDiscardIfDirty() {
-    if (!this._isDirty || this._saving) return true;
+    if (!this._isDirty || !!this._croppingTarget || this._saving) return true;
     return confirm("Are you sure you want to discard your changes?", {
       title: "Discard changes?",
       confirmButtonStyle: "danger",
