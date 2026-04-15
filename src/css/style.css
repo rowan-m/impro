@@ -6765,9 +6765,11 @@ toggle-switch {
   transition: opacity 0.15s;
 }
 
-.edit-profile-banner-preview:hover .edit-profile-image-overlay,
-.edit-profile-avatar-wrapper:hover .edit-profile-image-overlay {
-  opacity: 1;
+@media (hover: hover) {
+  .edit-profile-banner-preview:hover .edit-profile-image-overlay,
+  .edit-profile-avatar-wrapper:hover .edit-profile-image-overlay {
+    opacity: 1;
+  }
 }
 
 .edit-profile-camera-button {
