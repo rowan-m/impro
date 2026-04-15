@@ -3876,7 +3876,7 @@ emoji-picker {
 }
 
 .profile-description {
-  margin-top: 8px;
+  margin-top: 12px;
   padding: 0 16px 0px 16px;
   line-height: 1.3;
 }
@@ -5061,6 +5061,8 @@ context-menu-item-group:not(:last-child) .context-menu-item-group {
   margin: 0;
   overflow: visible;
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 800px) {
@@ -5090,6 +5092,8 @@ context-menu-item-group:not(:last-child) .context-menu-item-group {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .image-alt-text-dialog-header {
@@ -6653,6 +6657,8 @@ toggle-switch {
   top: 16px;
   max-height: calc(100vh - 16px);
   overflow: visible;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 800px) {
@@ -6664,11 +6670,12 @@ toggle-switch {
 }
 
 .edit-profile-dialog-content {
-  padding: 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: calc(100vh - 56px);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 
