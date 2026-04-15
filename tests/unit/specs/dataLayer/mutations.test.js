@@ -809,11 +809,30 @@ t.describe("updateProfile", (it) => {
     };
   }
 
+  function makeMockApi(overrides = {}) {
+    return {
+      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
+      putProfileRecord: async () => ({}),
+      uploadBlob: async () => ({
+        ref: { $link: "blob-link" },
+        mimeType: "image/jpeg",
+        size: 100,
+      }),
+      getProfile: async (did) => ({
+        did,
+        displayName: "Fetched Name",
+        description: "Fetched bio",
+        viewer: {},
+      }),
+      ...overrides,
+    };
+  }
+
   it("should call getProfileRecord and putProfileRecord", async () => {
     let getRecordCalled = false;
     let putRecordCalled = false;
     let putRecordArgs = null;
-    const mockApi = {
+    const mockApi = makeMockApi({
       getProfileRecord: async () => {
         getRecordCalled = true;
         return {
@@ -826,12 +845,7 @@ t.describe("updateProfile", (it) => {
         putRecordArgs = { record, swapRecord };
         return {};
       },
-      uploadBlob: async () => ({
-        ref: { $link: "blob-link" },
-        mimeType: "image/jpeg",
-        size: 100,
-      }),
-    };
+    });
 
     const { mutations } = createMutationsWithMockApi(mockApi);
     await mutations.updateProfile(testProfile, {
@@ -848,10 +862,8 @@ t.describe("updateProfile", (it) => {
 
   it("should upload avatar blob when provided", async () => {
     let uploadBlobCalled = false;
-    const mockApi = {
-      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
-      putProfileRecord: async () => ({}),
-      uploadBlob: async (blob) => {
+    const mockApi = makeMockApi({
+      uploadBlob: async () => {
         uploadBlobCalled = true;
         return {
           ref: { $link: "avatar-blob" },
@@ -859,7 +871,7 @@ t.describe("updateProfile", (it) => {
           size: 100,
         };
       },
-    };
+    });
 
     const { mutations } = createMutationsWithMockApi(mockApi);
     const fakeBlob = new Blob(["test"], { type: "image/jpeg" });
@@ -874,9 +886,7 @@ t.describe("updateProfile", (it) => {
 
   it("should upload banner blob when provided", async () => {
     let uploadBlobCallCount = 0;
-    const mockApi = {
-      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
-      putProfileRecord: async () => ({}),
+    const mockApi = makeMockApi({
       uploadBlob: async () => {
         uploadBlobCallCount++;
         return {
@@ -885,7 +895,7 @@ t.describe("updateProfile", (it) => {
           size: 100,
         };
       },
-    };
+    });
 
     const { mutations } = createMutationsWithMockApi(mockApi);
     const fakeBlob = new Blob(["test"], { type: "image/jpeg" });
@@ -898,16 +908,16 @@ t.describe("updateProfile", (it) => {
     assertEquals(uploadBlobCallCount, 1);
   });
 
-  it("should update dataStore on success", async () => {
-    const mockApi = {
-      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
-      putProfileRecord: async () => ({}),
-      uploadBlob: async () => ({
-        ref: { $link: "blob" },
-        mimeType: "image/jpeg",
-        size: 100,
+  it("should update dataStore with the fetched profile on success", async () => {
+    const mockApi = makeMockApi({
+      getProfile: async (did) => ({
+        did,
+        displayName: "Updated Name",
+        description: "Updated bio",
+        avatar: "https://example.com/new-avatar.jpg",
+        viewer: {},
       }),
-    };
+    });
 
     const { mutations, dataStore } = createMutationsWithMockApi(mockApi);
     await mutations.updateProfile(testProfile, {
@@ -918,65 +928,39 @@ t.describe("updateProfile", (it) => {
     const updatedProfile = dataStore.getProfile(testProfile.did);
     assertEquals(updatedProfile.displayName, "Updated Name");
     assertEquals(updatedProfile.description, "Updated bio");
+    assertEquals(updatedProfile.avatar, "https://example.com/new-avatar.jpg");
   });
 
-  it("should apply optimistic patch during update", () => {
-    const mockApi = {
-      getProfileRecord: async () => new Promise(() => {}), // Never resolves
-      putProfileRecord: async () => ({}),
-      uploadBlob: async () => ({
-        ref: { $link: "blob" },
-        mimeType: "image/jpeg",
-        size: 100,
-      }),
-    };
-
-    const { mutations, patchStore } = createMutationsWithMockApi(mockApi);
-    mutations.updateProfile(testProfile, {
-      displayName: "Optimistic Name",
-      description: "Optimistic bio",
+  it("should fetch profile with labelers after updating", async () => {
+    let getProfileArgs = null;
+    const mockApi = makeMockApi({
+      getProfile: async (did, options) => {
+        getProfileArgs = { did, options };
+        return {
+          did,
+          displayName: "Fetched",
+          description: "Fetched",
+          viewer: {},
+        };
+      },
     });
 
-    const patchedProfile = patchStore.applyProfilePatches(testProfile);
-    assertEquals(patchedProfile.displayName, "Optimistic Name");
-    assertEquals(patchedProfile.description, "Optimistic bio");
-  });
-
-  it("should clear optimistic patch after completion", async () => {
-    const mockApi = {
-      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
-      putProfileRecord: async () => ({}),
-      uploadBlob: async () => ({
-        ref: { $link: "blob" },
-        mimeType: "image/jpeg",
-        size: 100,
-      }),
-    };
-
-    const { mutations, patchStore, dataStore } =
-      createMutationsWithMockApi(mockApi);
+    const { mutations } = createMutationsWithMockApi(mockApi);
     await mutations.updateProfile(testProfile, {
       displayName: "New Name",
       description: "New bio",
     });
 
-    const updatedProfile = dataStore.getProfile(testProfile.did);
-    const patchedProfile = patchStore.applyProfilePatches(updatedProfile);
-    assertEquals(patchedProfile.displayName, updatedProfile.displayName);
+    assertEquals(getProfileArgs.did, testProfile.did);
+    assertEquals(Array.isArray(getProfileArgs.options.labelers), true);
   });
 
   it("should rethrow non-400 errors from getProfileRecord", async () => {
-    const mockApi = {
+    const mockApi = makeMockApi({
       getProfileRecord: async () => {
         throw { status: 500, message: "Internal Server Error" };
       },
-      putProfileRecord: async () => ({}),
-      uploadBlob: async () => ({
-        ref: { $link: "blob" },
-        mimeType: "image/jpeg",
-        size: 100,
-      }),
-    };
+    });
 
     const { mutations } = createMutationsWithMockApi(mockApi);
     try {
@@ -991,15 +975,14 @@ t.describe("updateProfile", (it) => {
   });
 
   it("should update currentUser when editing own profile", async () => {
-    const mockApi = {
-      getProfileRecord: async () => ({ value: {}, cid: "cid123" }),
-      putProfileRecord: async () => ({}),
-      uploadBlob: async () => ({
-        ref: { $link: "blob" },
-        mimeType: "image/jpeg",
-        size: 100,
+    const mockApi = makeMockApi({
+      getProfile: async (did) => ({
+        did,
+        displayName: "Updated User",
+        description: "Updated bio",
+        viewer: {},
       }),
-    };
+    });
 
     const { mutations, dataStore } = createMutationsWithMockApi(mockApi);
     await mutations.updateProfile(testProfile, {

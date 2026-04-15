@@ -216,16 +216,6 @@ export class PatchStore {
             activitySubscription: patchBody.activitySubscription,
           },
         };
-      case "updateProfile":
-        return {
-          ...profile,
-          displayName: patchBody.displayName ?? profile.displayName,
-          description: patchBody.description ?? profile.description,
-          avatar:
-            patchBody.avatar !== undefined ? patchBody.avatar : profile.avatar,
-          banner:
-            patchBody.banner !== undefined ? patchBody.banner : profile.banner,
-        };
       default:
         throw new Error("Unknown patch type", patchBody.type);
     }

@@ -1,6 +1,7 @@
 import { html, render } from "/js/lib/lit-html.js";
 import { Component } from "/js/components/component.js";
 import { ScrollLock } from "/js/scrollLock.js";
+import { avatarThumbnailUrl } from "/js/dataHelpers.js";
 import { classnames, graphemeCount, enableDragToDismiss } from "/js/utils.js";
 import { compressImage } from "/js/imageUtils.js";
 import "/js/components/image-cropper.js";
@@ -42,7 +43,7 @@ class EditProfileDialog extends Component {
     this._profile = profile;
     this._displayName = profile.displayName || "";
     this._description = profile.description || "";
-    this._currentAvatar = profile.avatar || null;
+    this._currentAvatar = avatarThumbnailUrl(profile.avatar) || null;
     this._currentBanner = profile.banner || null;
     this._newAvatarDataUrl = null;
     this._newBannerDataUrl = null;
@@ -421,6 +422,16 @@ class EditProfileDialog extends Component {
         bannerBlob = compressed.blob;
       }
 
+      const successCallback = () => {
+        this._doClose();
+      };
+      const errorCallback = (error) => {
+        console.error("Failed to update profile:", error);
+        this._error = "Failed to save profile. Please try again.";
+        this._saving = false;
+        this.render();
+      };
+
       this.dispatchEvent(
         new CustomEvent("profile-save", {
           detail: {
@@ -432,6 +443,8 @@ class EditProfileDialog extends Component {
               removeAvatar: this._removeAvatar,
               removeBanner: this._removeBanner,
             },
+            successCallback,
+            errorCallback,
           },
         }),
       );
@@ -483,12 +496,6 @@ class EditProfileDialog extends Component {
       dialog.close();
     }
     this.dispatchEvent(new CustomEvent("edit-profile-closed"));
-  }
-
-  setError(error) {
-    this._error = error;
-    this._saving = false;
-    this.render();
   }
 }
 

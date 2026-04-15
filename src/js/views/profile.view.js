@@ -95,7 +95,12 @@ class ProfileView extends View {
     async function handleEditProfile(profile) {
       const dialog = document.createElement("edit-profile-dialog");
       dialog.addEventListener("profile-save", (event) =>
-        handleSaveProfile(profile, event.detail.profileUpdates),
+        handleSaveProfile(
+          profile,
+          event.detail.profileUpdates,
+          event.detail.successCallback,
+          event.detail.errorCallback,
+        ),
       );
       dialog.addEventListener("edit-profile-closed", () => {
         dialog.remove();
@@ -413,17 +418,19 @@ class ProfileView extends View {
       return html`<div class="profile-container"></div>`;
     }
 
-    async function handleSaveProfile(profile, profileUpdates) {
-      const dialog = root.querySelector("edit-profile-dialog");
+    async function handleSaveProfile(
+      profile,
+      profileUpdates,
+      successCallback,
+      errorCallback,
+    ) {
       try {
         await dataLayer.mutations.updateProfile(profile, profileUpdates);
         showToast("Profile updated");
-        dialog.close();
+        successCallback();
         renderPage();
-        dataLayer.requests.loadProfile(profileDid);
       } catch (error) {
-        console.error("Failed to update profile:", error);
-        dialog?.setError("Failed to save profile. Please try again.");
+        errorCallback(error);
       }
     }
 
