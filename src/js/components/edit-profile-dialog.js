@@ -469,7 +469,8 @@ class EditProfileDialog extends Component {
         ignoreTouchTarget: (el) =>
           el.tagName === "BUTTON" ||
           el.tagName === "INPUT" ||
-          el.tagName === "TEXTAREA",
+          el.tagName === "TEXTAREA" ||
+          !!el.closest("image-cropper"),
       });
     }
   }
