@@ -1,19 +1,7 @@
 import { parseUri } from "/js/dataHelpers.js";
 import { RefreshTokenError, getAuth } from "/js/auth.js";
 import { TokenRefreshError as OauthRefreshTokenError } from "/js/oauth.js";
-import { batch, getCurrentTimestamp } from "/js/utils.js";
-
-export function buildQueryString(obj) {
-  const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(obj)) {
-    if (Array.isArray(value)) {
-      value.forEach((v) => query.append(key, v));
-    } else {
-      query.append(key, value);
-    }
-  }
-  return query.toString();
-}
+import { batch, buildQueryString, getCurrentTimestamp } from "/js/utils.js";
 
 export class ApiError extends Error {
   constructor(res) {

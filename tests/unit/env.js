@@ -49,11 +49,8 @@ globalThis.window.HTMLDialogElement.prototype.close = function () {
   this.removeAttribute("open");
 };
 
-// Fail loudly on any unmocked network call. Tests that need fetch should
-// assign their own stub to globalThis.fetch.
-globalThis.fetch = async (url) => {
-  throw new Error(`Unmocked fetch call in test: ${url}`);
-};
+// Prevent network requests. We can mock this in individual tests as needed.
+delete globalThis.fetch;
 
 // JSDOM's window.crypto lacks subtle; swap in node's webcrypto.
 if (!globalThis.window.crypto?.subtle) {

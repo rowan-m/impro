@@ -223,6 +223,18 @@ export function raf() {
   return new Promise((resolve) => requestAnimationFrame(resolve));
 }
 
+export function buildQueryString(obj) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(obj)) {
+    if (Array.isArray(value)) {
+      value.forEach((entry) => query.append(key, entry));
+    } else {
+      query.append(key, value);
+    }
+  }
+  return query.toString();
+}
+
 export function batch(items, batchSize) {
   const batches = [];
   for (let i = 0; i < items.length; i += batchSize) {

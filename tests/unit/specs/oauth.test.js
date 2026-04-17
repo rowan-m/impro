@@ -1,5 +1,5 @@
 import { TestSuite } from "../testSuite.js";
-import { assert, assertEquals } from "../testHelpers.js";
+import { assert, assertEquals, MockFetch } from "../testHelpers.js";
 import {
   OauthClient,
   TokenRefreshError,
@@ -64,11 +64,16 @@ function writeSession(overrides = {}) {
   localStorage.setItem("oauth_session", JSON.stringify(sessionData));
 }
 
-const originalFetch = globalThis.fetch;
+const TOKEN_URL = "https://auth.example.com/token";
+const PDS_URL = "https://pds.example.com/";
+
+t.beforeEach(() => {
+  globalThis.fetch = new MockFetch();
+});
 
 t.afterEach(() => {
   globalThis.localStorage.clear();
-  globalThis.fetch = originalFetch;
+  delete globalThis.fetch;
 });
 
 t.describe("error classes", (it) => {
@@ -243,16 +248,13 @@ t.describe("OauthClient.handleCallback", (it) => {
   it("should throw DID mismatch when token sub differs from in-flight did", async () => {
     const client = await buildClient();
     writeInFlight("req1", { did: "did:plc:expected" });
-    globalThis.fetch = async () =>
-      mockResponse({
-        body: {
-          access_token: "at",
-          refresh_token: "rt",
-          expires_in: 3600,
-          sub: "did:plc:different",
-          scope: "atproto",
-        },
-      });
+    globalThis.fetch.__interceptJson(TOKEN_URL, {
+      access_token: "at",
+      refresh_token: "rt",
+      expires_in: 3600,
+      sub: "did:plc:different",
+      scope: "atproto",
+    });
     const state = encodeURIComponent(JSON.stringify({ requestId: "req1" }));
     let threw = null;
     try {
@@ -271,12 +273,13 @@ t.describe("OauthClient.handleCallback", (it) => {
   it("should throw when token exchange returns a non-ok response", async () => {
     const client = await buildClient();
     writeInFlight("req1");
-    globalThis.fetch = async () =>
+    globalThis.fetch.__intercept(TOKEN_URL, async () =>
       mockResponse({
         ok: false,
         status: 400,
         text: "invalid_grant",
-      });
+      }),
+    );
     const state = encodeURIComponent(JSON.stringify({ requestId: "req1" }));
     let threw = null;
     try {
@@ -296,16 +299,13 @@ t.describe("OauthClient.handleCallback", (it) => {
     const client = await buildClient();
     writeInFlight("req1", { did: "did:plc:test" });
     writeInFlight("req_stale", { did: "did:plc:other" });
-    globalThis.fetch = async () =>
-      mockResponse({
-        body: {
-          access_token: "new-at",
-          refresh_token: "new-rt",
-          expires_in: 3600,
-          sub: "did:plc:test",
-          scope: "atproto",
-        },
-      });
+    globalThis.fetch.__interceptJson(TOKEN_URL, {
+      access_token: "new-at",
+      refresh_token: "new-rt",
+      expires_in: 3600,
+      sub: "did:plc:test",
+      scope: "atproto",
+    });
     const state = encodeURIComponent(JSON.stringify({ requestId: "req1" }));
     const session = await client.handleCallback({
       code: "abc",
@@ -337,23 +337,15 @@ t.describe("Session.fetch token refresh", (it) => {
 
   it("should refresh token when within 60s of expiry", async () => {
     const session = await getLoadedSession({ expiresAt: Date.now() + 30000 });
-    const calls = [];
-    globalThis.fetch = async (url) => {
-      calls.push(String(url));
-      if (String(url).includes("/token")) {
-        return mockResponse({
-          body: {
-            access_token: "new-at",
-            refresh_token: "new-rt",
-            expires_in: 3600,
-          },
-        });
-      }
-      return mockResponse({ body: { ok: true } });
-    };
+    globalThis.fetch.__interceptJson(TOKEN_URL, {
+      access_token: "new-at",
+      refresh_token: "new-rt",
+      expires_in: 3600,
+    });
+    globalThis.fetch.__interceptJson(PDS_URL, { ok: true });
     const response = await session.fetch("https://pds.example.com/xrpc/foo");
     assert(response.ok);
-    assert(calls[0].includes("/token"));
+    assert(globalThis.fetch.calls[0].url.includes("/token"));
     const stored = JSON.parse(localStorage.getItem("oauth_session"));
     assertEquals(stored.accessToken, "new-at");
     assertEquals(stored.refreshToken, "new-rt");
@@ -361,47 +353,36 @@ t.describe("Session.fetch token refresh", (it) => {
 
   it("should not refresh when token has plenty of time left", async () => {
     const session = await getLoadedSession({ expiresAt: Date.now() + 3600000 });
-    const calls = [];
-    globalThis.fetch = async (url) => {
-      calls.push(String(url));
-      return mockResponse({ body: { ok: true } });
-    };
+    globalThis.fetch.__interceptJson(PDS_URL, { ok: true });
     await session.fetch("https://pds.example.com/xrpc/foo");
-    assert(!calls.some((url) => url.includes("/token")));
+    assert(!globalThis.fetch.calls.some((call) => call.url.includes("/token")));
   });
 
   it("should deduplicate concurrent refresh requests", async () => {
     const session = await getLoadedSession({ expiresAt: Date.now() + 30000 });
-    let refreshCount = 0;
-    globalThis.fetch = async (url) => {
-      if (String(url).includes("/token")) {
-        refreshCount++;
-        return mockResponse({
-          body: {
-            access_token: "new-at",
-            refresh_token: "new-rt",
-            expires_in: 3600,
-          },
-        });
-      }
-      return mockResponse({ body: {} });
-    };
+    globalThis.fetch.__interceptJson(TOKEN_URL, {
+      access_token: "new-at",
+      refresh_token: "new-rt",
+      expires_in: 3600,
+    });
+    globalThis.fetch.__interceptJson(PDS_URL, {});
     await Promise.all([
       session.fetch("https://pds.example.com/xrpc/a"),
       session.fetch("https://pds.example.com/xrpc/b"),
       session.fetch("https://pds.example.com/xrpc/c"),
     ]);
-    assertEquals(refreshCount, 1);
+    const tokenCalls = globalThis.fetch.calls.filter((call) =>
+      call.url.includes("/token"),
+    );
+    assertEquals(tokenCalls.length, 1);
   });
 
   it("should throw TokenRefreshError on non-500 refresh failure", async () => {
     const session = await getLoadedSession({ expiresAt: Date.now() + 30000 });
-    globalThis.fetch = async (url) => {
-      if (String(url).includes("/token")) {
-        return mockResponse({ ok: false, status: 400, text: "invalid_grant" });
-      }
-      return mockResponse({ body: {} });
-    };
+    globalThis.fetch.__intercept(TOKEN_URL, async () =>
+      mockResponse({ ok: false, status: 400, text: "invalid_grant" }),
+    );
+    globalThis.fetch.__interceptJson(PDS_URL, {});
     let threw = null;
     try {
       await session.fetch("https://pds.example.com/xrpc/foo");
@@ -414,26 +395,24 @@ t.describe("Session.fetch token refresh", (it) => {
   it("should retry refresh once on 500 error", async () => {
     const session = await getLoadedSession({ expiresAt: Date.now() + 30000 });
     let refreshCount = 0;
-    globalThis.fetch = async (url) => {
-      if (String(url).includes("/token")) {
-        refreshCount++;
-        if (refreshCount === 1) {
-          return mockResponse({
-            ok: false,
-            status: 500,
-            text: "server error",
-          });
-        }
+    globalThis.fetch.__intercept(TOKEN_URL, async () => {
+      refreshCount++;
+      if (refreshCount === 1) {
         return mockResponse({
-          body: {
-            access_token: "new-at",
-            refresh_token: "new-rt",
-            expires_in: 3600,
-          },
+          ok: false,
+          status: 500,
+          text: "server error",
         });
       }
-      return mockResponse({ body: {} });
-    };
+      return mockResponse({
+        body: {
+          access_token: "new-at",
+          refresh_token: "new-rt",
+          expires_in: 3600,
+        },
+      });
+    });
+    globalThis.fetch.__interceptJson(PDS_URL, {});
     await session.fetch("https://pds.example.com/xrpc/foo");
     assertEquals(refreshCount, 2);
   });
@@ -449,7 +428,7 @@ t.describe("DPoP nonce retry", (it) => {
   it("should retry once when response is 401 with use_dpop_nonce", async () => {
     const session = await getLoadedSession();
     let callCount = 0;
-    globalThis.fetch = async () => {
+    globalThis.fetch.__intercept(PDS_URL, async () => {
       callCount++;
       if (callCount === 1) {
         return mockResponse({
@@ -460,36 +439,31 @@ t.describe("DPoP nonce retry", (it) => {
         });
       }
       return mockResponse({ body: { ok: true } });
-    };
+    });
     const response = await session.fetch("https://pds.example.com/xrpc/foo");
-    assertEquals(callCount, 2);
+    assertEquals(globalThis.fetch.calls.length, 2);
     assert(response.ok);
   });
 
   it("should not retry when 401 without use_dpop_nonce error", async () => {
     const session = await getLoadedSession();
-    let callCount = 0;
-    globalThis.fetch = async () => {
-      callCount++;
-      return mockResponse({
+    globalThis.fetch.__intercept(PDS_URL, async () =>
+      mockResponse({
         ok: false,
         status: 401,
         body: { error: "invalid_token" },
-      });
-    };
+      }),
+    );
     const response = await session.fetch("https://pds.example.com/xrpc/foo");
-    assertEquals(callCount, 1);
+    assertEquals(globalThis.fetch.calls.length, 1);
     assert(!response.ok);
   });
 
   it("should attach DPoP proof header to outgoing fetch", async () => {
     const session = await getLoadedSession();
-    let receivedHeaders = null;
-    globalThis.fetch = async (_url, options) => {
-      receivedHeaders = options.headers;
-      return mockResponse({ body: { ok: true } });
-    };
+    globalThis.fetch.__interceptJson(PDS_URL, { ok: true });
     await session.fetch("https://pds.example.com/xrpc/foo");
+    const receivedHeaders = globalThis.fetch.calls[0].options.headers;
     assert(receivedHeaders.DPoP);
     assertEquals(receivedHeaders.Authorization, "DPoP at");
     // DPoP proof is a JWT: header.payload.signature
@@ -500,12 +474,8 @@ t.describe("DPoP nonce retry", (it) => {
 t.describe("OauthClient.getAuthorizationUrl", (it) => {
   it("should throw HandleNotFoundError when handle does not resolve", async () => {
     const client = await buildClient();
-    globalThis.fetch = async (url) => {
-      if (String(url).includes("resolveHandle")) {
-        return mockResponse({ body: { did: null } });
-      }
-      return mockResponse({ body: {} });
-    };
+    globalThis.fetch.__interceptJson(/resolveHandle/, { did: null });
+    globalThis.fetch.__interceptJson("https://", {});
     let threw = null;
     try {
       await client.getAuthorizationUrl("unknown.bsky.social");

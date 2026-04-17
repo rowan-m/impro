@@ -6,27 +6,13 @@ import { Preferences } from "/js/preferences.js";
 
 const t = new TestSuite("Requests");
 
-const originalFetch = globalThis.fetch;
+const stubConstellation = { getLinks: async () => [] };
 
-t.beforeEach(() => {
-  globalThis.fetch = async (route) => {
-    if (
-      route.startsWith(
-        "https://constellation.microcosm.blue/xrpc/blue.microcosm.links.getBacklinks",
-      )
-    ) {
-      return {
-        ok: true,
-        json: async () => ({ records: [], cursor: null }),
-      };
-    }
-    throw new Error("Unhandled route");
-  };
-});
-
-t.afterEach(() => {
-  globalThis.fetch = originalFetch;
-});
+function createRequests(api, dataStore, preferencesProvider) {
+  return new Requests(api, dataStore, preferencesProvider, {
+    constellation: stubConstellation,
+  });
+}
 
 t.describe("loadPostThread", (it) => {
   const postURI = "at://did:test/app.bsky.feed.post/thread";
@@ -58,7 +44,11 @@ t.describe("loadPostThread", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadPostThread(postURI);
 
@@ -90,7 +80,11 @@ t.describe("loadPostThread", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadPostThread(postURI);
 
@@ -122,7 +116,11 @@ t.describe("loadNextFeedPage", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadNextFeedPage(feedURI);
 
@@ -162,7 +160,11 @@ t.describe("loadNextFeedPage", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadNextFeedPage(feedURI);
 
@@ -193,7 +195,11 @@ t.describe("loadNextFeedPage", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadNextFeedPage(feedURI);
 
@@ -228,7 +234,11 @@ t.describe("loadNextFeedPage", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadNextFeedPage(feedURI);
 
@@ -259,7 +269,11 @@ t.describe("loadProfile", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadProfile(profileDID);
 
@@ -284,7 +298,11 @@ t.describe("loadProfile", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadProfile(profileDID);
 
@@ -327,7 +345,11 @@ t.describe("loadLabelerInfo", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadLabelerInfo(labelerDid);
 
@@ -347,7 +369,11 @@ t.describe("loadLabelerInfo", (it) => {
     const mockPreferencesProvider = {
       requirePreferences: () => Preferences.createLoggedOutPreferences(),
     };
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadLabelerInfo(labelerDid);
 
@@ -376,7 +402,11 @@ t.describe("loadLabelerInfo", (it) => {
       getLabeler: async () => currentInfo,
     };
 
-    const requests = new Requests(mockApi, dataStore, mockPreferencesProvider);
+    const requests = createRequests(
+      mockApi,
+      dataStore,
+      mockPreferencesProvider,
+    );
 
     await requests.loadLabelerInfo(labelerDid);
     assertEquals(dataStore.getLabelerInfo(labelerDid), initialInfo);
