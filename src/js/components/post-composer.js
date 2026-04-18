@@ -15,7 +15,7 @@ import { confirm } from "/js/modals.js";
 import { ScrollLock } from "/js/scrollLock.js";
 import { imageIconTemplate } from "/js/templates/icons/imageIcon.template.js";
 import { showToast } from "/js/toasts.js";
-import { IN_APP_LINK_DOMAINS } from "/js/config.js";
+import { IN_APP_LINK_DOMAINS, LINK_CARD_SERVICE_URL } from "/js/config.js";
 import { quotedPostTemplate } from "/js/templates/postEmbed.template.js";
 import { createEmbedFromPost } from "/js/dataHelpers.js";
 import "/js/components/rich-text-input.js";
@@ -489,7 +489,7 @@ class PostComposer extends Component {
     this.render();
     let res = null;
     try {
-      res = await fetch("https://cardyb.bsky.app/v1/extract?url=" + url);
+      res = await fetch(`${LINK_CARD_SERVICE_URL}/v1/extract?url=${url}`);
     } catch (error) {
       console.error("Error loading external link embed preview: ", error);
       return;

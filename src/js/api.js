@@ -2,6 +2,11 @@ import { parseUri } from "/js/dataHelpers.js";
 import { RefreshTokenError, getAuth } from "/js/auth.js";
 import { TokenRefreshError as OauthRefreshTokenError } from "/js/oauth.js";
 import { batch, buildQueryString, getCurrentTimestamp } from "/js/utils.js";
+import {
+  PUBLIC_SERVICE_ENDPOINT_URL,
+  BSKY_APPVIEW_SERVICE_DID,
+  BSKY_CHAT_SERVICE_DID,
+} from "/js/config.js";
 
 export class ApiError extends Error {
   constructor(res) {
@@ -17,7 +22,7 @@ export class ApiError extends Error {
 
 class PublicSession {
   constructor() {
-    this.serviceEndpoint = "https://public.api.bsky.app";
+    this.serviceEndpoint = PUBLIC_SERVICE_ENDPOINT_URL;
   }
   async fetch(url, options) {
     return fetch(url, options);
@@ -31,8 +36,8 @@ export class Api {
   constructor(
     session,
     {
-      bskyAppViewServiceDid = "did:web:api.bsky.app#bsky_appview",
-      chatAppViewServiceDid = "did:web:api.bsky.chat#bsky_chat",
+      bskyAppViewServiceDid = BSKY_APPVIEW_SERVICE_DID,
+      chatAppViewServiceDid = BSKY_CHAT_SERVICE_DID,
     } = {},
   ) {
     this.isAuthenticated = !!session;

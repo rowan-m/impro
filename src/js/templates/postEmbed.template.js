@@ -12,6 +12,7 @@ import { postHeaderTextTemplate } from "/js/templates/postHeaderText.template.js
 import { postLabelsTemplate } from "/js/templates/postLabels.template.js";
 import { linkToPost, linkToFeed } from "/js/navigation.js";
 import { moderationWarningTemplate } from "/js/templates/moderationWarning.template.js";
+import { OG_CARD_SERVICE_URL } from "/js/config.js";
 import "/js/components/lightbox-image-group.js";
 import "/js/components/streaming-video.js";
 import "/js/components/gif-player.js";
@@ -264,7 +265,7 @@ function externalTemplate({ external, lazyLoadImages }) {
 }
 
 function getStarterPackThumbnail(starterPack) {
-  return `https://ogcard.cdn.bsky.app/start/${
+  return `${OG_CARD_SERVICE_URL}/start/${
     starterPack.creator.did
   }/${getRKey(starterPack)}`;
 }
