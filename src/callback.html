@@ -24,7 +24,8 @@
 
         if (
           parsedState.loopback === true &&
-          !window.location.origin.includes("localhost")
+          window.env.environment === "development" &&
+          window.location.hostname !== "localhost"
         ) {
           window.location.href =
             "http://localhost:8080/callback.html" + window.location.search;
