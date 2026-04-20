@@ -278,6 +278,32 @@ t.describe("smallPostTemplate - reply-to label", (it) => {
     );
   });
 
+  it("should render 'Replied to you' when replyToAuthor is the current user", () => {
+    const result = smallPostTemplate({
+      post: post,
+      ...baseProps,
+      showReplyToLabel: true,
+      replyToAuthor: {
+        did: "did:plc:test",
+        displayName: "Reply Author Name",
+        handle: "replyauthor.bsky.social",
+      },
+    });
+    const container = document.createElement("div");
+    render(result, container);
+    const label = container.querySelector(".reply-to-author");
+    assert(label !== null);
+    const text = label.textContent.replace(/\s+/g, " ").trim();
+    assert(
+      text.includes("Replied to you"),
+      `expected "Replied to you" in "${text}"`,
+    );
+    assert(
+      !text.includes("Reply Author Name"),
+      `did not expect display name in "${text}"`,
+    );
+  });
+
   it("should render 'Replied to user' when replyToAuthor is missing", () => {
     const result = smallPostTemplate({
       post: post,

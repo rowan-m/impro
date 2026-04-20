@@ -129,7 +129,9 @@ export function smallPostTemplate({
             ? html`<div class="reply-to-author">
                 ⤷ Replied to
                 ${replyToAuthor
-                  ? html` ${getDisplayName(replyToAuthor)}`
+                  ? replyToAuthor.did === currentUser?.did
+                    ? " you"
+                    : html` ${getDisplayName(replyToAuthor)}`
                   : " user"}
               </div>`
             : ""}
