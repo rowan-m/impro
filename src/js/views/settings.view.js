@@ -77,7 +77,10 @@ class SettingsView extends View {
                     class="vertical-nav-item danger-button"
                     @click=${async () => {
                       if (
-                        !(await confirm("Are you sure you want to sign out?"))
+                        !(await confirm("Are you sure you want to sign out?", {
+                          confirmButtonStyle: "danger",
+                          confirmButtonText: "Sign out",
+                        }))
                       ) {
                         return;
                       }
