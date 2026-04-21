@@ -7,26 +7,67 @@ import {
   AuthError,
 } from "/js/auth.js";
 import { html, render } from "/js/lib/lit-html.js";
+import { AppViewConfig, DEFAULT_APP_VIEW_CONFIGS } from "/js/config.js";
+import {
+  getAppViewConfig,
+  setAppViewConfig,
+  isValidAppViewConfig,
+  CUSTOM_APP_VIEW_CONFIG_ID,
+} from "/js/appViewConfig.js";
 
 class LoginView extends View {
   async render({ root, params, context }) {
     await requireNoAuth();
 
+    const storedConfig = getAppViewConfig();
+    const isStoredCustom = storedConfig.id === CUSTOM_APP_VIEW_CONFIG_ID;
+    const advancedOpenByDefault = storedConfig.id !== AppViewConfig.BLUESKY.id;
+
     const state = {
       loading: false,
       errorMessage: null,
+      appViewSelection: storedConfig.id,
+      customAppViewServiceDid: isStoredCustom
+        ? storedConfig.appViewServiceDid
+        : "",
+      customChatServiceDid: isStoredCustom ? storedConfig.chatServiceDid : "",
     };
 
     const auth = await getAuth();
     const isBasicAuth = auth instanceof BasicAuth;
 
+    function resolveSelectedAppViewConfig() {
+      if (state.appViewSelection === CUSTOM_APP_VIEW_CONFIG_ID) {
+        return {
+          id: CUSTOM_APP_VIEW_CONFIG_ID,
+          appViewServiceDid: state.customAppViewServiceDid.trim(),
+          chatServiceDid: state.customChatServiceDid.trim(),
+        };
+      }
+      return (
+        DEFAULT_APP_VIEW_CONFIGS.find(
+          (config) => config.id === state.appViewSelection,
+        ) ?? AppViewConfig.BLUESKY
+      );
+    }
+
     async function handleSubmit(e) {
       e.preventDefault();
       const handle = e.target.handle.value;
       const password = isBasicAuth ? e.target.password.value : null;
+
+      const selectedConfig = resolveSelectedAppViewConfig();
+      if (!isValidAppViewConfig(selectedConfig)) {
+        state.errorMessage = "Invalid AppView configuration";
+        renderPage();
+        return;
+      }
+
       state.loading = true;
       renderPage();
       try {
+        setAppViewConfig(selectedConfig);
+
         // allow truncated handles
         let fullHandle = handle.includes(".")
           ? handle
@@ -50,7 +91,21 @@ class LoginView extends View {
       }
     }
 
+    function handleAppViewChange(e) {
+      state.appViewSelection = e.target.value;
+      renderPage();
+    }
+
+    function handleCustomAppViewDidInput(e) {
+      state.customAppViewServiceDid = e.target.value;
+    }
+
+    function handleCustomChatDidInput(e) {
+      state.customChatServiceDid = e.target.value;
+    }
+
     function renderPage() {
+      const isCustom = state.appViewSelection === CUSTOM_APP_VIEW_CONFIG_ID;
       render(
         html`<div id="login-view">
           <main>
@@ -62,8 +117,9 @@ class LoginView extends View {
               <form id="login-form" @submit=${(e) => handleSubmit(e)}>
                 <div class="form-title">Sign in</div>
                 <div class="form-group">
-                  <label for="email">Username or email</label>
+                  <label for="handle">Username or email</label>
                   <input
+                    id="handle"
                     name="handle"
                     type="text"
                     placeholder="example.bsky.social"
@@ -77,6 +133,7 @@ class LoginView extends View {
                   ? html` <div class="form-group">
                       <label for="password">Password</label>
                       <input
+                        id="password"
                         name="password"
                         type="password"
                         placeholder="Password"
@@ -84,6 +141,83 @@ class LoginView extends View {
                       />
                     </div>`
                   : ""}
+                <details id="login-advanced" ?open=${advancedOpenByDefault}>
+                  <summary>Advanced</summary>
+                  <div class="form-group">
+                    <label for="appview">AppView</label>
+                    <div class="select-wrapper">
+                      <select
+                        id="appview"
+                        name="appview"
+                        @change=${(e) => handleAppViewChange(e)}
+                      >
+                        ${DEFAULT_APP_VIEW_CONFIGS.map(
+                          (defaultConfig) => html`
+                            <option
+                              value=${defaultConfig.id}
+                              ?selected=${state.appViewSelection ===
+                              defaultConfig.id}
+                            >
+                              ${defaultConfig.displayName}
+                            </option>
+                          `,
+                        )}
+                        <option
+                          value=${CUSTOM_APP_VIEW_CONFIG_ID}
+                          ?selected=${state.appViewSelection ===
+                          CUSTOM_APP_VIEW_CONFIG_ID}
+                        >
+                          Custom
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  ${isCustom
+                    ? html`
+                        <div class="form-group">
+                          <label for="appViewServiceDid">
+                            AppView service DID
+                          </label>
+                          <input
+                            id="appViewServiceDid"
+                            name="appViewServiceDid"
+                            type="text"
+                            placeholder="did:web:example.com#bsky_appview"
+                            required
+                            autocorrect="off"
+                            autocapitalize="off"
+                            spellcheck="false"
+                            .value=${state.customAppViewServiceDid}
+                            @input=${(e) => handleCustomAppViewDidInput(e)}
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label for="chatServiceDid">Chat service DID</label>
+                          <input
+                            id="chatServiceDid"
+                            name="chatServiceDid"
+                            type="text"
+                            placeholder="did:web:example.com#bsky_chat"
+                            required
+                            autocorrect="off"
+                            autocapitalize="off"
+                            spellcheck="false"
+                            .value=${state.customChatServiceDid}
+                            @input=${(e) => handleCustomChatDidInput(e)}
+                          />
+                        </div>
+                        <div class="warning-area">
+                          <strong
+                            >Only set these values if you know what you're
+                            doing.</strong
+                          >
+                          You can use the query parameter
+                          <code>?reset-appview</code> to switch back to the
+                          default AppView in case of misconfiguration.
+                        </div>
+                      `
+                    : ""}
+                </details>
                 <div class="button-group">
                   <button type="button" @click=${() => router.go("/")}>
                     Back

@@ -62,6 +62,10 @@
         IN_APP_LINK_DOMAINS,
       } from "/js/config.js";
       import { setUpIdentityPrecaching } from "/js/identityPrecaching.js";
+      import {
+        getAppViewConfig,
+        handleAppViewResetQueryParam,
+      } from "/js/appViewConfig.js";
 
       // Dev tools
       import "/js/perf.js";
@@ -76,9 +80,15 @@
         document.body.classList.add("native");
       }
 
+      handleAppViewResetQueryParam();
+
       const auth = await getAuth();
       const session = await auth.getSession();
-      const api = new Api(session ?? null);
+      const appViewConfig = getAppViewConfig();
+      const api = new Api(session ?? null, {
+        bskyAppViewServiceDid: appViewConfig.appViewServiceDid,
+        chatAppViewServiceDid: appViewConfig.chatServiceDid,
+      });
       const dataLayer = new DataLayer(api);
       // put dataLayer on window for easy access in dev tools
       window.dataLayer = dataLayer;
