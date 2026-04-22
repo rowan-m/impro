@@ -5996,10 +5996,14 @@ moderation-warning .toggle-content {
 }
 
 #login-advanced summary {
+  font-size: 14px;
   cursor: pointer;
   padding: 4px 0;
   user-select: none;
   color: var(--text-color-muted);
+}
+#login-advanced summary::marker {
+  margin-right: 2px;
 }
 
 #login-advanced .form-group {
@@ -6010,10 +6014,40 @@ moderation-warning .toggle-content {
   margin-top: 12px;
   padding: 12px;
   background-color: color-mix(in srgb, var(--warning-color) 12%, transparent);
-  color: var(--text-color);
+  color: color-mix(in srgb, var(--warning-color) 60%, var(--text-color));
   font-size: 14px;
   line-height: 1.5;
   border-radius: var(--text-input-border-radius);
+}
+.warning-area h4 {
+  color: var(--warning-color);
+}
+
+.info-area {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: color-mix(in srgb, var(--highlight-color) 12%, transparent);
+  color: color-mix(in srgb, var(--highlight-color) 60%, var(--text-color));
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: var(--text-input-border-radius);
+}
+
+.info-area h4 {
+  color: var(--highlight-color);
+}
+
+.warning-area h4,
+.info-area h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.warning-area h4 .icon,
+.info-area h4 .icon {
+  width: 18px;
+  height: 18px;
 }
 
 @media (min-width: 800px) {

@@ -14,6 +14,8 @@ import {
   isValidAppViewConfig,
   CUSTOM_APP_VIEW_CONFIG_ID,
 } from "/js/appViewConfig.js";
+import { alertIconTemplate } from "/js/templates/icons/alertIcon.template.js";
+import { infoIconTemplate } from "/js/templates/icons/infoIcon.template.js";
 
 class LoginView extends View {
   async render({ root, params, context }) {
@@ -142,9 +144,9 @@ class LoginView extends View {
                     </div>`
                   : ""}
                 <details id="login-advanced" ?open=${advancedOpenByDefault}>
-                  <summary>Advanced</summary>
+                  <summary>Advanced options</summary>
                   <div class="form-group">
-                    <label for="appview">AppView</label>
+                    <label for="appview">Choose AppView</label>
                     <div class="select-wrapper">
                       <select
                         id="appview"
@@ -174,6 +176,10 @@ class LoginView extends View {
                   </div>
                   ${isCustom
                     ? html`
+                        <div class="warning-area">
+                          <h4>${alertIconTemplate()} Warning</h4>
+                          Only set these values if you know what they mean!
+                        </div>
                         <div class="form-group">
                           <label for="appViewServiceDid">
                             AppView service DID
@@ -206,17 +212,12 @@ class LoginView extends View {
                             @input=${(e) => handleCustomChatDidInput(e)}
                           />
                         </div>
-                        <div class="warning-area">
-                          <strong
-                            >Only set these values if you know what you're
-                            doing.</strong
-                          >
-                          You can use the query parameter
-                          <code>?reset-appview</code> to switch back to the
-                          default AppView in case of misconfiguration.
-                        </div>
                       `
                     : ""}
+                  <div class="info-area">
+                    <h4>${infoIconTemplate()} Tip</h4>
+                    You can also switch AppViews under Settings while logged in.
+                  </div>
                 </details>
                 <div class="button-group">
                   <button type="button" @click=${() => router.go("/")}>
