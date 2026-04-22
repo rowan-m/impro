@@ -6203,6 +6203,20 @@ moderation-warning .toggle-content {
   text-align: center;
 }
 
+.dev-version-overlay {
+  position: fixed;
+  bottom: 4px;
+  right: 4px;
+  z-index: 9999;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 10px;
+  font-family: monospace;
+  pointer-events: none;
+}
+
 .plain-text-page {
   padding: 16px;
 }
