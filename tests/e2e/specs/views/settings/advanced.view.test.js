@@ -211,7 +211,7 @@ test.describe("Settings Advanced view", () => {
     }) => {
       await page.goto("/settings/advanced");
 
-      await expect(page).toHaveURL("/login", { timeout: 10000 });
+      await expect(page).toHaveURL(/\/login(\?|$)/, { timeout: 10000 });
     });
   });
 });

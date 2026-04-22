@@ -15,6 +15,7 @@ import {
   CUSTOM_APP_VIEW_CONFIG_ID,
 } from "/js/appViewConfig.js";
 import { alertIconTemplate } from "/js/templates/icons/alertIcon.template.js";
+import { validateReturnToParam } from "/js/navigation.js";
 
 class LoginView extends View {
   async render({ root, params, context }) {
@@ -33,6 +34,11 @@ class LoginView extends View {
         : "",
       customChatServiceDid: isStoredCustom ? storedConfig.chatServiceDid : "",
     };
+
+    function getCurrentReturnTo() {
+      const params = new URLSearchParams(window.location.search);
+      return validateReturnToParam(params.get("returnTo"));
+    }
 
     const auth = await getAuth();
     const isBasicAuth = auth instanceof BasicAuth;
@@ -76,8 +82,9 @@ class LoginView extends View {
         if (fullHandle.startsWith("@")) {
           fullHandle = fullHandle.slice(1);
         }
-        await auth.login(fullHandle, password);
-        window.location.href = "/";
+        const returnTo = getCurrentReturnTo();
+        await auth.login(fullHandle, password, { returnTo });
+        window.location.href = returnTo ?? "/";
       } catch (error) {
         if (error instanceof InvalidUsernameError) {
           state.errorMessage = "Invalid username";

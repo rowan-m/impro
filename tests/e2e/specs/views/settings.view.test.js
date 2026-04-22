@@ -97,7 +97,7 @@ test.describe("Settings view", () => {
     }) => {
       await page.goto("/settings");
 
-      await expect(page).toHaveURL("/login", { timeout: 10000 });
+      await expect(page).toHaveURL(/\/login(\?|$)/, { timeout: 10000 });
     });
   });
 });

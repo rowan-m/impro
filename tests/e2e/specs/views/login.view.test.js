@@ -1,5 +1,6 @@
 import { test, expect } from "../../base.js";
 import { MockServer } from "../../mockServer.js";
+import { login } from "../../helpers.js";
 
 test.describe("Login view", () => {
   test("should display the login form", async ({ page }) => {
@@ -103,6 +104,37 @@ test.describe("Login view", () => {
     await expect(advanced.locator('select[name="appview"]')).toHaveValue(
       "blacksky",
     );
+  });
+
+  test.describe("returnTo", () => {
+    test("requireAuth sends the original path as returnTo when bouncing logged-out users", async ({
+      page,
+    }) => {
+      await page.goto("/bookmarks");
+      await expect(page).toHaveURL(/\/login\?returnTo=%2Fbookmarks$/, {
+        timeout: 10000,
+      });
+    });
+
+    test("already-authed users hitting /login?returnTo=... are sent to that path", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto("/login?returnTo=%2Fbookmarks");
+      await expect(page).toHaveURL(/\/bookmarks$/, { timeout: 10000 });
+    });
+
+    test("already-authed users hitting /login with an unsafe returnTo go home", async ({
+      page,
+    }) => {
+      const mockServer = new MockServer();
+      await mockServer.setup(page);
+      await login(page);
+      await page.goto("/login?returnTo=%2F%2Fevil.com");
+      await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
+    });
   });
 
   test("prefills custom DID inputs when stored config is custom", async ({
