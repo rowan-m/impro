@@ -6010,6 +6010,15 @@ moderation-warning .toggle-content {
   margin-top: 8px;
 }
 
+#login-advanced .helper-text {
+  margin-top: 8px;
+}
+
+#login-advanced .helper-text .icon {
+  width: 18px;
+  height: 18px;
+}
+
 .warning-area {
   margin-top: 12px;
   padding: 12px;
@@ -7069,4 +7078,9 @@ image-cropper {
 .edit-profile-cropper-container {
   border-radius: 8px;
   overflow: hidden;
+}
+
+.helper-text {
+  font-size: 13px;
+  color: var(--text-color-muted);
 }

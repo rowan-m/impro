@@ -15,7 +15,6 @@ import {
   CUSTOM_APP_VIEW_CONFIG_ID,
 } from "/js/appViewConfig.js";
 import { alertIconTemplate } from "/js/templates/icons/alertIcon.template.js";
-import { infoIconTemplate } from "/js/templates/icons/infoIcon.template.js";
 
 class LoginView extends View {
   async render({ root, params, context }) {
@@ -214,9 +213,9 @@ class LoginView extends View {
                         </div>
                       `
                     : ""}
-                  <div class="info-area">
-                    <h4>${infoIconTemplate()} Tip</h4>
-                    You can also switch AppViews under Settings while logged in.
+                  <div class="helper-text">
+                    Tip: You can also switch AppViews under Settings while
+                    logged in.
                   </div>
                 </details>
                 <div class="button-group">
