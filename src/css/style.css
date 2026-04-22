@@ -5951,12 +5951,12 @@ moderation-warning .toggle-content {
   margin-top: 8px;
 }
 
-#login-form .select-wrapper {
+.select-wrapper {
   position: relative;
   width: 100%;
 }
 
-#login-form .select-wrapper::after {
+.select-wrapper::after {
   content: "";
   position: absolute;
   right: 14px;
@@ -5972,7 +5972,7 @@ moderation-warning .toggle-content {
     no-repeat center / contain;
 }
 
-#login-form select {
+.select-wrapper select {
   font-size: 16px;
   width: 100%;
   padding: 12px 40px 12px 12px;
@@ -5986,9 +5986,25 @@ moderation-warning .toggle-content {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  #login-form select:hover {
+  .select-wrapper select:hover {
     border-color: var(--text-color-muted);
   }
+}
+
+#settings-advanced-form input {
+  font-size: 16px;
+}
+
+#settings-advanced-form .helper-text {
+  margin-top: 14px;
+}
+
+.settings-section .form-group {
+  margin-top: 8px;
+}
+
+.settings-section .button-group {
+  margin-top: 16px;
 }
 
 #login-advanced {
@@ -6104,7 +6120,7 @@ moderation-warning .toggle-content {
   font-size: 14px;
 }
 
-.error-message-container {
+#login-view .error-message-container {
   height: 2em;
 }
 
