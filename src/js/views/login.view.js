@@ -152,7 +152,7 @@ class LoginView extends View {
                 <details id="login-advanced" ?open=${advancedOpenByDefault}>
                   <summary>Advanced options</summary>
                   <div class="form-group">
-                    <label for="appview">Use App View</label>
+                    <label for="appview">App View</label>
                     <div class="select-wrapper">
                       <select
                         id="appview"
