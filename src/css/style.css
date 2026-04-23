@@ -1738,8 +1738,8 @@ body.scroll-locked header {
 .small-post .missing-post-indicator {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   border-radius: var(--blocked-post-radius);
   padding: 14px;
   background: light-dark(var(--lightest-gray), var(--gray));
@@ -1747,8 +1747,28 @@ body.scroll-locked header {
   width: 100%;
 }
 
+.small-post .missing-post-indicator .icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .small-post .missing-post-indicator.no-unauthenticated {
   margin-top: 8px;
+}
+
+.missing-quote-indicator {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-color-muted);
+}
+
+.missing-quote-indicator .icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .large-post.no-unauthenticated-post {
@@ -5861,6 +5881,20 @@ moderation-warning .top-bar {
 
 moderation-warning .show-hide-label {
   color: var(--text-color);
+}
+
+moderation-warning .moderation-warning-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+moderation-warning .moderation-warning-label .icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 @media (min-width: 800px) {
